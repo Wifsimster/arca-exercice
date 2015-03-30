@@ -53,8 +53,26 @@ public class DataManager {
         return dataEntity;
     }
 
-    public static List<DataEntity> getAllData() throws UnknownHostException {
-        return getDatastore().find(DataEntity.class).asList();
+    /**
+     * Return a list of data from offset to limit
+     *
+     * @param offset
+     * @param limit
+     * @return
+     * @throws UnknownHostException
+     */
+    public static List<DataEntity> getAllData(int offset, int limit) throws UnknownHostException {
+        return getDatastore().find(DataEntity.class).offset(offset).limit(limit).asList();
+    }
+
+    /**
+     * Return the count of all data in database
+     *
+     * @return
+     * @throws UnknownHostException
+     */
+    public static long getCount() throws UnknownHostException {
+        return getDatastore().find(DataEntity.class).countAll();
     }
 
     /**

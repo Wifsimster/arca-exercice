@@ -24,7 +24,7 @@ public class WebController extends WebMvcConfigurerAdapter {
     public String home(Model model) {
 
         try {
-            List<DataEntity> allData = DataManager.getAllData();
+            List<DataEntity> allData = DataManager.getAllData(0, 150);
             LOGGER.info("All data size : {}", allData.size());
             model.addAttribute("allData", allData);
         } catch (UnknownHostException e) {
