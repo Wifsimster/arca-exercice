@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Hello Spring Boot!</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<h1>Title</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Timestamp</th>
+        <th>Value</th>
+        <th>Country</th>
+        <th>Line</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="data : ${allData}">
+        <td th:text="${{data.date}}">13/01/2011</td>
+        <td th:text="${data.value}">13/01/2011</td>
+        <td th:text="${data.country}">13/01/2011</td>
+        <td th:text="${data.line}">13/01/2011</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

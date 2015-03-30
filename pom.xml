@@ -1,0 +1,100 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.2.2.RELEASE</version>
+    </parent>
+
+    <groupId>com.arca</groupId>
+    <artifactId>arca-exercice</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>arca-exercice</name>
+
+    <modules>
+        <module>arca-exercice-batch</module>
+        <module>arca-exercice-core</module>
+        <module>arca-exercice-front</module>
+        <module>arca-exercice-resources</module>
+    </modules>
+
+    <properties>
+        <slf4j.log4j12.version>1.7.7</slf4j.log4j12.version>
+        <maven.surefire.plugin.version>2.7.2</maven.surefire.plugin.version>
+        <org.mongodb.morphia.version>0.110</org.mongodb.morphia.version>
+        <com.kolich.common.version>0.3</com.kolich.common.version>
+        <jetty.version>9.2.10.v20150310</jetty.version>
+        <vaadin.version>7.4.2</vaadin.version>
+        <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
+        <joda.time.version>2.7</joda.time.version>
+
+        <project.source.version>1.7</project.source.version>
+        <project.target.version>1.7</project.target.version>
+        <java.version>1.7</java.version>
+        <project.encoding>UTF-8</project.encoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.log4j12.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>${joda.time.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven.surefire.plugin.version}</version>
+                    <configuration>
+                        <forkMode>never</forkMode>
+                        <argLine>-Xms1024m -Xmx1024m -XX:MaxPermSize=2048m</argLine>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <env>dev</env>
+            </properties>
+        </profile>
+    </profiles>
+
+    <repositories>
+        <repository>
+            <id>Kolichrepo</id>
+            <name>Kolich repo</name>
+            <url>http://markkolich.github.io/repo/</url>
+            <layout>default</layout>
+        </repository>
+    </repositories>
+</project>
