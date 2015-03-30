@@ -13,3 +13,7 @@ hs_err_pid*
 
 .idea
 data.txt
+arca-exercice-batch/target
+arca-exercice-core/target
+arca-exercice-front/target
+arca-exercice-resources/target
