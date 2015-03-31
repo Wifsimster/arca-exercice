@@ -42,27 +42,33 @@
         </div>
 
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-            <h1>Data
+            <h1 class="page-header">Dashboard</h1>
+
+            <button type="submit" class="btn btn-lg btn-primary">Launch batch</button>
+
+            <h2 class="sub-header">Data
                 <small th:text="${count}"></small>
-            </h1>
-            <table>
-                <thead>
-                <tr>
-                    <th>Timestamp</th>
-                    <th>Value</th>
-                    <th>Country</th>
-                    <th>Line</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="data : ${allData}">
-                    <td th:text="${{data.date}}">13/01/2011</td>
-                    <td th:text="${data.value}">13/01/2011</td>
-                    <td th:text="${data.country}">13/01/2011</td>
-                    <td th:text="${data.line}">13/01/2011</td>
-                </tr>
-                </tbody>
-            </table>
+            </h2>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Value</th>
+                        <th>Country</th>
+                        <th>Line</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="data : ${allData}">
+                        <td th:text="${{data.date}}">13/01/2011</td>
+                        <td th:text="${data.value}">13/01/2011</td>
+                        <td th:text="${data.country}">13/01/2011</td>
+                        <td th:text="${data.line}">13/01/2011</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
