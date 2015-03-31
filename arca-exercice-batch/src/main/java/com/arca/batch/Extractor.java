@@ -1,8 +1,6 @@
 package com.arca.batch;
 
 
-import com.arca.core.entity.DataEntity;
-import com.arca.core.manager.DataManager;
 import com.kolich.common.util.io.JumpToLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +9,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.Date;
-import java.util.Scanner;
 
 /**
  * Extract batch
@@ -46,27 +41,27 @@ public class Extractor {
 //    }
 
     public void extractFile() {
-        try {
-            long startTime = System.nanoTime();
-
-            DataEntity dataEntity = DataManager.getLastData();
-
-            if (dataEntity != null) {
-                LOGGER.info("Percentage extracted {}%", getPercentage(dataEntity.getLine()));
-                LOGGER.info("Last line extracted was {}", dataEntity.getLine());
-                readFile(dataEntity.getLine(), DATA_FILE_NAME);
-            } else {
-                LOGGER.info("Data file is read for the first time !");
-                readFile(0, DATA_FILE_NAME);
-            }
-
-            long endTime = System.nanoTime();
-            long duration = (endTime - startTime) / 1000000;
-
-            LOGGER.info("Extract duration {} ms", duration);
-        } catch (IOException e) {
-            LOGGER.error("Error : {}", e);
-        }
+//        try {
+//            long startTime = System.nanoTime();
+//
+//            Data data = DataManager.getLastData();
+//
+//            if (data != null) {
+//                LOGGER.info("Percentage extracted {}%", getPercentage(data.getLine()));
+//                LOGGER.info("Last line extracted was {}", data.getLine());
+//                readFile(data.getLine(), DATA_FILE_NAME);
+//            } else {
+//                LOGGER.info("Data file is read for the first time !");
+//                readFile(0, DATA_FILE_NAME);
+//            }
+//
+//            long endTime = System.nanoTime();
+//            long duration = (endTime - startTime) / 1000000;
+//
+//            LOGGER.info("Extract duration {} ms", duration);
+//        } catch (IOException e) {
+//            LOGGER.error("Error : {}", e);
+//        }
     }
 
     public float getPercentage(long line) {
@@ -129,31 +124,31 @@ public class Extractor {
      */
     private static void processLine(String line, Long lineNumber) {
         // Use a second Scanner to parse the content of each line
-        Scanner scanner = new Scanner(line);
-        scanner.useDelimiter(",");
-        if (scanner.hasNext()) {
-
-            // Assumes the line has a certain structure
-            String timestamp = scanner.next();
-            String value = scanner.next();
-            String country = scanner.next();
-
-            try {
-                // Build Data com.arca.core.entity
-                DataEntity dataEntity = new DataEntity();
-                dataEntity.setDate(new Date(Long.valueOf(timestamp)));  // Assuming timestamp is in milliseconds
-                dataEntity.setValue(Integer.parseInt(value));
-                dataEntity.setCountry(country);
-                dataEntity.setLine(lineNumber);
-
-                LOGGER.debug("Data : {}", dataEntity.toString());
-                DataManager.createData(dataEntity);
-
-            } catch (UnknownHostException | NumberFormatException e) {
-                LOGGER.error("Error : {}", e);
-            }
-        } else {
-            LOGGER.warn("Empty or invalid line. Unable to process.");
-        }
+//        Scanner scanner = new Scanner(line);
+//        scanner.useDelimiter(",");
+//        if (scanner.hasNext()) {
+//
+//            // Assumes the line has a certain structure
+//            String timestamp = scanner.next();
+//            String value = scanner.next();
+//            String country = scanner.next();
+//
+//            try {
+//                // Build Data com.arca.core.entity
+//                Data data = new Data();
+//                data.setDate(new Date(Long.valueOf(timestamp)));  // Assuming timestamp is in milliseconds
+//                data.setValue(Integer.parseInt(value));
+//                data.setCountry(country);
+//                data.setLine(lineNumber);
+//
+//                LOGGER.debug("Data : {}", data.toString());
+//                DataManager.createData(data);
+//
+//            } catch (UnknownHostException | NumberFormatException e) {
+//                LOGGER.error("Error : {}", e);
+//            }
+//        } else {
+//            LOGGER.warn("Empty or invalid line. Unable to process.");
+//        }
     }
 }

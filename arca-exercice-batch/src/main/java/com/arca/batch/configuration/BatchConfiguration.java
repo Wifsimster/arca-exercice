@@ -2,7 +2,7 @@ package com.arca.batch.configuration;
 
 import com.arca.batch.bean.DataTxt;
 import com.arca.batch.processor.DataItemProcessor;
-import com.arca.core.entity.DataEntity;
+import com.arca.batch.bean.Data;
 import com.mongodb.MongoClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,13 +64,13 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public ItemProcessor<DataTxt, DataEntity> processor() {
+    public ItemProcessor<DataTxt, Data> processor() {
         return new DataItemProcessor();
     }
 
     @Bean
-    public ItemWriter<DataEntity> writer(MongoOperations template) {
-        final MongoItemWriter<DataEntity> mongoItemWriter = new MongoItemWriter<DataEntity>();
+    public ItemWriter<Data> writer(MongoOperations template) {
+        final MongoItemWriter<Data> mongoItemWriter = new MongoItemWriter<Data>();
         mongoItemWriter.setTemplate(template);
         mongoItemWriter.setCollection("data");
         return mongoItemWriter;
@@ -89,7 +89,7 @@ public class BatchConfiguration {
 
     @Bean
     public MongoDbFactory mongoDbFactory() throws Exception {
-        LOGGER.info("MongoDB({}:{})",ADDRESS, PORT);
+        LOGGER.info("MongoDB({}:{})", ADDRESS, PORT);
         MongoClient client = new MongoClient(ADDRESS, PORT);
         return new SimpleMongoDbFactory(client, DB_NAME);
     }
@@ -101,13 +101,12 @@ public class BatchConfiguration {
 
     @Bean
     public Step step1(StepBuilderFactory stepBuilderFactory, ItemReader<DataTxt> reader,
-                      ItemWriter<DataEntity> writer, ItemProcessor<DataTxt, DataEntity> processor) {
+                      ItemWriter<Data> writer, ItemProcessor<DataTxt, Data> processor) {
 
         ItemReadListener<DataTxt> itemReadListener = new ItemReadListener<DataTxt>() {
 
             @Override
             public void beforeRead() {
-
             }
 
             @Override
@@ -117,12 +116,12 @@ public class BatchConfiguration {
 
             @Override
             public void onReadError(Exception e) {
-                LOGGER.warn("Error reading line : {}", e);
+                LOGGER.warn("Error reading line : {}", e.getMessage());
             }
         };
 
         return stepBuilderFactory.get("step1")
-                .<DataTxt, DataEntity>chunk(10)
+                .<DataTxt, Data>chunk(10)
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)

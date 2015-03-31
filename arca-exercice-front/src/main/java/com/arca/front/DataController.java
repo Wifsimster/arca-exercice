@@ -1,7 +1,7 @@
 package com.arca.front;
 
 import com.arca.batch.Extractor;
-import com.arca.core.entity.DataEntity;
+import com.arca.batch.bean.Data;
 import com.arca.core.manager.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,24 +30,24 @@ public class DataController {
     public DataList getData(@PathVariable int page, @PathVariable int count) {
 
         DataList dataList = new DataList();
-        List<DataEntity> dataPaginate = new ArrayList<>();
+        List<Data> dataPaginate = new ArrayList<>();
 
-        try {
+//        try {
             // Get paginate data
-            dataPaginate = DataManager.getAllData(count * page, count);
-            long allDataSize = DataManager.getCount();
+//            dataPaginate = DataManager.getAllData(count * page, count);
+//            long allDataSize = DataManager.getCount();
 
             // Build response object
             dataList.setCount(count);
             dataList.setPage(page);
-            dataList.setPages((int) (DataManager.getCount() / count));
-            dataList.setSize((int) allDataSize);
+//            dataList.setPages((int) (DataManager.getCount() / count));
+//            dataList.setSize((int) allDataSize);
             dataList.setDataEntities(dataPaginate);
             dataList.setSortBy("timestamp");
             dataList.setSortOrder("asc");
-        } catch (UnknownHostException e) {
-            LOGGER.error("Error : {}", e);
-        }
+//        } catch (UnknownHostException e) {
+//            LOGGER.error("Error : {}", e);
+//        }
 
         return dataList;
     }

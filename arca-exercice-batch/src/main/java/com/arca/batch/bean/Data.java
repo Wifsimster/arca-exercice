@@ -1,21 +1,17 @@
-package com.arca.core.entity;
+package com.arca.batch.bean;
 
-import org.mongodb.morphia.annotations.Entity;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
-/**
- * Data com.arca.core.entity
- */
-@Entity("data")
-public class DataEntity {
+@Document()
+public class Data {
     // id is auto-generated
 
     private Date date;
     private Integer value;
     private String country;
     private Long line;
-
 
     public Date getDate() {
         return date;
@@ -52,6 +48,6 @@ public class DataEntity {
 
     @Override
     public String toString() {
-        return "Line " + this.getLine() + " : " + this.getDate() + ", " + this.getValue() + ", " + this.getCountry();
+        return this.getDate() + ", " + this.getValue() + ", " + this.getCountry();
     }
 }
