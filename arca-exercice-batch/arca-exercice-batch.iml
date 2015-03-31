@@ -25,4 +25,5 @@
     <orderEntry type="library" name="Maven: log4j:log4j:1.2.17" level="project" />
     <orderEntry type="library" name="Maven: joda-time:joda-time:2.7" level="project" />
   </component>
+  <component name="POM File Configuration" pomFile="" />
 </module>

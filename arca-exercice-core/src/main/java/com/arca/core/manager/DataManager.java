@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * Data manager
@@ -18,9 +19,10 @@ public class DataManager {
     // Slf4j logger
     private final static Logger LOGGER = LoggerFactory.getLogger(DataManager.class);
 
-    private static final String DB_NAME = "arca";
-    private static final String ADDR = "192.168.0.21";
-    private static final int PORT = 27017;
+    private static ResourceBundle bundleConfigApplication = ResourceBundle.getBundle("application");
+    private static final String ADDRESS = bundleConfigApplication.getString("db.address");
+    private static final int PORT = Integer.valueOf(bundleConfigApplication.getString("db.port"));
+    private static final String DB_NAME = bundleConfigApplication.getString("db.name");
 
     private static Morphia morphia;
     private static MongoClient mongoClient;
@@ -28,7 +30,7 @@ public class DataManager {
 
     private static MongoClient getMongoClient() throws UnknownHostException {
         if (mongoClient == null) {
-            mongoClient = new MongoClient(ADDR, PORT);
+            mongoClient = new MongoClient(ADDRESS, PORT);
         }
         return mongoClient;
     }
