@@ -12,7 +12,7 @@
 hs_err_pid*
 
 .idea
-data.txt
+arca-exercice-batch/src/main/java/resources/data.txt
 arca-exercice-batch/target
 arca-exercice-core/target
 arca-exercice-front/target

@@ -40,10 +40,10 @@ public class Extractor {
         }
     }
 
-    public static void main(String... args) throws IOException {
-        Extractor ext = new Extractor();
-        ext.extractFile();
-    }
+//    public static void main(String... args) throws IOException {
+//        Extractor ext = new Extractor();
+//        ext.extractFile();
+//    }
 
     public void extractFile() {
         try {
