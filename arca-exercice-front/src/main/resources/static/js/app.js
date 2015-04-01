@@ -50,8 +50,19 @@ angular.module('ArcaApp', ['ngTasty'])
         };
 
         $scope.extract = function() {
-            console.log("Post - extract");
+            console.log("Post - extract job");
             $http.get('/extract').then(function (response) {
+                if (response.status == 200) {
+                    console.log(response);
+                } else {
+                    console.error(response);
+                }
+            });
+        };
+
+        $scope.stop = function() {
+            console.log("Post - stop job");
+            $http.get('/stop').then(function (response) {
                 if (response.status == 200) {
                     console.log(response);
                 } else {

@@ -5,6 +5,7 @@ import com.arca.front.domain.DataList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,14 +29,25 @@ public class DataController {
     @Autowired
     Job importDataJob;
 
+    private static JobExecution jobExecution;
+
     /**
      * Run data import job within a Web Container
      *
      * @throws Exception
      */
     @RequestMapping(value = "/extract", method = RequestMethod.GET)
-    public void handel() throws Exception {
-        jobLauncher.run(importDataJob, new JobParameters());
+    public void handle() throws Exception {
+        jobExecution = jobLauncher.run(importDataJob, new JobParameters());
+        LOGGER.info("Job start !");
+        LOGGER.info("{}", jobExecution);
+    }
+
+
+    @RequestMapping(value = "/stop", method = RequestMethod.GET)
+    public void stop() throws Exception {
+        jobExecution.stop();
+        LOGGER.info("Job stop !");
     }
 
     @RequestMapping(value = "/data?page={page}&count={count}", method = RequestMethod.GET)
