@@ -1,6 +1,7 @@
 package com.arca.front.domain;
 
 import com.arca.front.bean.Data;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
  */
 public class DataList {
 
-    private List<Data> dataEntities;
+    private Page<Data> dataEntities;
     private int page;
     private int count;
     private int pages;
@@ -17,11 +18,11 @@ public class DataList {
     private String sortBy;
     private String sortOrder;
 
-    public List<Data> getDataEntities() {
+    public Page<Data> getDataEntities() {
         return dataEntities;
     }
 
-    public void setDataEntities(List<Data> dataEntities) {
+    public void setDataEntities(Page<Data> dataEntities) {
         this.dataEntities = dataEntities;
     }
 

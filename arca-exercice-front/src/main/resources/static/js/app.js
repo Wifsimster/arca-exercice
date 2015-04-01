@@ -1,5 +1,5 @@
-angular.module('ArcaApp', ['ngTasty'])
-    .controller('AppCtrl', function ($scope, $http) {
+angular.module('ArcaApp', ['ngTasty', 'toaster'])
+    .controller('AppCtrl', function ($scope, $http, toaster) {
 
         $scope.init = {
             'count': 10,
@@ -50,8 +50,7 @@ angular.module('ArcaApp', ['ngTasty'])
         };
 
         $scope.extract = function() {
-            console.log("Post - extract job");
-            $http.get('/extract').then(function (response) {
+            $http.get('/job/start').then(function (response) {
                 if (response.status == 200) {
                     console.log(response);
                 } else {
@@ -61,10 +60,20 @@ angular.module('ArcaApp', ['ngTasty'])
         };
 
         $scope.stop = function() {
-            console.log("Post - stop job");
-            $http.get('/stop').then(function (response) {
+            $http.get('/job/stop').then(function (response) {
+                if (response.status == 200) {
+                    toaster.pop('success', "Success", "Job Stop !");
+                } else {
+                    console.error(response);
+                }
+            });
+        };
+
+        $scope.status = function() {
+            $http.get('/job/status').then(function (response) {
                 if (response.status == 200) {
                     console.log(response);
+                    toaster.pop('info', "Status", response.data);
                 } else {
                     console.error(response);
                 }
