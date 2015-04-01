@@ -2,12 +2,15 @@ package com.arca.front;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 
-@SpringBootApplication
+import java.util.Arrays;
+
+@SpringBootApplication  // same as @Configuration @EnableAutoConfiguration @ComponentScan
 public class Application {
 
     public static void main(String[] args) throws Exception {
-        SpringApplication.run(Application.class, args);
+        ApplicationContext ctx = SpringApplication.run(Application.class, args);
     }
 
 }

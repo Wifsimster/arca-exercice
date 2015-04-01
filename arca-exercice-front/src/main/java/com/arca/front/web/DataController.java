@@ -1,16 +1,18 @@
-package com.arca.front;
+package com.arca.front.web;
 
-import com.arca.batch.Extractor;
-import com.arca.batch.bean.Data;
-import com.arca.core.manager.DataManager;
+import com.arca.front.bean.Data;
+import com.arca.front.domain.DataList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,10 +22,20 @@ public class DataController {
     // Slf4j logger
     private final static Logger LOGGER = LoggerFactory.getLogger(DataController.class);
 
-    @RequestMapping(value = "/extract", method = RequestMethod.POST)
-    public void extractFile() {
-        Extractor extractor = new Extractor();
-        extractor.extractFile();
+    @Autowired
+    JobLauncher jobLauncher;
+
+    @Autowired
+    Job importDataJob;
+
+    /**
+     * Run data import job within a Web Container
+     *
+     * @throws Exception
+     */
+    @RequestMapping(value = "/extract", method = RequestMethod.GET)
+    public void handel() throws Exception {
+        jobLauncher.run(importDataJob, new JobParameters());
     }
 
     @RequestMapping(value = "/data?page={page}&count={count}", method = RequestMethod.GET)
@@ -33,18 +45,18 @@ public class DataController {
         List<Data> dataPaginate = new ArrayList<>();
 
 //        try {
-            // Get paginate data
+        // Get paginate data
 //            dataPaginate = DataManager.getAllData(count * page, count);
 //            long allDataSize = DataManager.getCount();
 
-            // Build response object
-            dataList.setCount(count);
-            dataList.setPage(page);
+        // Build response object
+        dataList.setCount(count);
+        dataList.setPage(page);
 //            dataList.setPages((int) (DataManager.getCount() / count));
 //            dataList.setSize((int) allDataSize);
-            dataList.setDataEntities(dataPaginate);
-            dataList.setSortBy("timestamp");
-            dataList.setSortOrder("asc");
+//        dataList.setDataEntities(dataPaginate);
+        dataList.setSortBy("timestamp");
+        dataList.setSortOrder("asc");
 //        } catch (UnknownHostException e) {
 //            LOGGER.error("Error : {}", e);
 //        }

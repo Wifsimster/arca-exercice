@@ -16,8 +16,6 @@
     <name>arca-exercice</name>
 
     <modules>
-        <module>arca-exercice-batch</module>
-        <module>arca-exercice-core</module>
         <module>arca-exercice-front</module>
         <module>arca-exercice-resources</module>
     </modules>

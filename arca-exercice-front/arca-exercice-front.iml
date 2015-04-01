@@ -11,8 +11,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="arca-exercice-batch" />
-    <orderEntry type="module" module-name="arca-exercice-core" />
+    <orderEntry type="library" name="Maven: com.arca:arca-exercice-batch:1.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: com.arca:arca-exercice-core:1.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.mongodb.morphia:morphia:0.110" level="project" />
     <orderEntry type="library" name="Maven: org.mongodb.morphia:morphia-util:0.110" level="project" />
     <orderEntry type="library" name="Maven: com.thoughtworks.proxytoys:proxytoys:1.0" level="project" />
