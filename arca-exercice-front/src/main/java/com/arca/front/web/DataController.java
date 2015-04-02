@@ -18,14 +18,15 @@ import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.batch.operations.NoSuchJobException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 public class DataController {
@@ -47,6 +48,9 @@ public class DataController {
 
     @Autowired
     JobFactory jobFactory;
+
+    @Autowired
+    private DataRepository repository;
 
     /**
      * Build job parameters
@@ -117,6 +121,9 @@ public class DataController {
                     //LOGGER.info(item);
                     String[] value = item.split("=");
 
+//                    LOGGER.info("{} != {}", "status", value[0]);
+//                    LOGGER.info("{} != {}", "status".getClass().getName(), value[0].getClass().getName());
+
                     if ("status".equals(value[0])) {
                         LOGGER.info("{} : {}", value[0], value[1]);
                         executions.setStatus(value[1]);
@@ -144,35 +151,27 @@ public class DataController {
         return executions;
     }
 
-    @Autowired
-    private DataRepository repository;
-
+    /**
+     * Return paginate data
+     *
+     * @param page
+     * @param count
+     * @return
+     */
     @RequestMapping(value = "/data?page={page}&count={count}", method = RequestMethod.GET)
     public DataList getData(@PathVariable int page, @PathVariable int count) {
 
-
         DataList dataList = new DataList();
-        //List<Data> dataPaginate = new ArrayList<>();
-
-//        try {
-        // Get paginate data
-//            dataPaginate = DataManager.getAllData(count * page, count);
-//            long allDataSize = DataManager.getCount();
-
         Page<Data> dataPaginate = repository.findAll(new PageRequest(page, count));
-        long allDataSize = repository.count();
 
         // Build response object
-        dataList.setCount(count);
+        dataList.setCount(dataPaginate.getSize());
         dataList.setPage(page);
-        dataList.setPages((int) (allDataSize / count));
-        dataList.setSize((int) allDataSize);
-        dataList.setDataEntities(dataPaginate);
+        dataList.setPages((int) (dataPaginate.getTotalElements() / dataPaginate.getSize()));
+        dataList.setSize((int) dataPaginate.getTotalElements());
+        dataList.setDataEntities(dataPaginate.getContent());
         dataList.setSortBy("timestamp");
         dataList.setSortOrder("asc");
-//        } catch (UnknownHostException e) {
-//            LOGGER.error("Error : {}", e);
-//        }
 
         return dataList;
     }

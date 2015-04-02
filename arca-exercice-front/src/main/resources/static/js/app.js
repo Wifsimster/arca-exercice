@@ -53,8 +53,10 @@ angular.module('ArcaApp', ['ngTasty', 'toaster'])
             $http.get('/job/start').then(function (response) {
                 if (response.status == 200) {
                     console.log(response);
+                    toaster.pop('success', "Success", "Job start !");
                 } else {
                     console.error(response);
+                    toaster.pop('error', "Error", response.status);
                 }
             });
         };
@@ -62,9 +64,10 @@ angular.module('ArcaApp', ['ngTasty', 'toaster'])
         $scope.stop = function() {
             $http.get('/job/stop').then(function (response) {
                 if (response.status == 200) {
-                    toaster.pop('success', "Success", "Job Stop !");
+                    toaster.pop('success', "Success", "Job stop !");
                 } else {
                     console.error(response);
+                    toaster.pop('error', "Error", response.status);
                 }
             });
         };
@@ -76,6 +79,7 @@ angular.module('ArcaApp', ['ngTasty', 'toaster'])
                     toaster.pop('info', "Status", response.data);
                 } else {
                     console.error(response);
+                    toaster.pop('error', "Error", response.status);
                 }
             });
         };
