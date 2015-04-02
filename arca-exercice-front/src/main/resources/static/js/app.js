@@ -53,7 +53,7 @@ angular.module('ArcaApp', ['ngTasty', 'toaster'])
             $http.get('/job/start').then(function (response) {
                 if (response.status == 200) {
                     console.log(response);
-                    toaster.pop('success', "Success", "Job start !");
+                    toaster.pop('success', "Success", response.data);
                 } else {
                     console.error(response);
                     toaster.pop('error', "Error", response.status);
