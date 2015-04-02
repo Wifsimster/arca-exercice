@@ -49,22 +49,33 @@ angular.module('ArcaApp', ['ngTasty', 'toaster'])
             });
         };
 
-        $scope.extract = function() {
+        // Batch state
+        $scope.execution = false;
+
+        $scope.extract = function () {
             $http.get('/job/start').then(function (response) {
                 if (response.status == 200) {
-                    console.log(response);
-                    toaster.pop('success', "Success", response.data);
+                    if (response.data.statusCode == 200) {
+                        toaster.pop('success', "Success", response.data.message);
+                        $scope.execution = true;
+                    } else {
+                        toaster.pop('error', "Error", response.data.message);
+                    }
                 } else {
-                    console.error(response);
                     toaster.pop('error', "Error", response.status);
                 }
             });
         };
 
-        $scope.stop = function() {
+        $scope.stop = function () {
             $http.get('/job/stop').then(function (response) {
                 if (response.status == 200) {
-                    toaster.pop('success', "Success", "Job stop !");
+                    if (response.data.statusCode == 200) {
+                        $scope.execution = false;
+                        toaster.pop('success', "Success", response.data.message);
+                    } else {
+                        toaster.pop('error', "Error", response.data.message);
+                    }
                 } else {
                     console.error(response);
                     toaster.pop('error', "Error", response.status);
@@ -72,11 +83,16 @@ angular.module('ArcaApp', ['ngTasty', 'toaster'])
             });
         };
 
-        $scope.status = function() {
+        $scope.status = function () {
             $http.get('/job/status').then(function (response) {
+                console.log(response);
                 if (response.status == 200) {
-                    console.log(response);
-                    toaster.pop('info', "Status", response.data);
+                    if (response.data.statusCode == 200) {
+                        info = response.data.data;
+                        toaster.pop('info', "Info", "<p> Status : " + info.status + "<br>Write count : " + info.writeCount + "</p>", 5000, 'trustedHtml');
+                    } else {
+                        toaster.pop('error', "Error", response.data.message);
+                    }
                 } else {
                     console.error(response);
                     toaster.pop('error', "Error", response.status);

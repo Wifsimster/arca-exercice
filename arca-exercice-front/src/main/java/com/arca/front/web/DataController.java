@@ -2,20 +2,22 @@ package com.arca.front.web;
 
 import com.arca.front.bean.Data;
 import com.arca.front.bean.Executions;
+import com.arca.front.bean.Response;
 import com.arca.front.domain.DataList;
 import com.arca.front.repository.DataRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.configuration.DuplicateJobException;
 import org.springframework.batch.core.configuration.JobFactory;
 import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.launch.JobInstanceAlreadyExistsException;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,11 +25,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.batch.api.listener.JobListener;
 import javax.batch.operations.NoSuchJobException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 public class DataController {
@@ -65,45 +68,63 @@ public class DataController {
         return p;
     }
 
+    @Autowired
+    @Qualifier("asyncJobLauncher")
+    private JobLauncher asyncJobLauncher;
+
+    private JobExecution execution;
+
     /**
      * Run data import job within a Web Container
      *
      * @throws Exception
      */
     @RequestMapping(value = "/job/start", method = RequestMethod.GET)
-    public String startJob() throws Exception {
+    public Response startJob() throws Exception {
 
-        String message = null;
+        Response response = new Response();
 
         try {
+            // Register the job from registry
             jobRegistry.register(jobFactory);
-            jobOperator.start(importDataJob.getName(), String.valueOf(System.currentTimeMillis()));
-            message = "Job started !";
-        } catch (NoSuchJobException | JobInstanceAlreadyExistsException e) {
+
+            // Start async the job with timestamp parameter
+            execution = asyncJobLauncher.run(importDataJob, createInitialJobParameterMap());
+
+            // Response object
+            response.setStatusCode(200);
+            response.setMessage("Status : " + execution.getStatus());
+            response.setData(execution);
+        } catch (NoSuchJobException | DuplicateJobException e) {
             LOGGER.error("{}", e.getMessage());
-            message = "This job is already exists !";
-        } catch (DuplicateJobException e) {
-            LOGGER.error("{}", e.getMessage());
-            message = "This job is already register !";
+            response.setStatusCode(400);
+            response.setMessage("Something went wrong with job !");
+            response.setData(e);
         }
 
-        return message;
+        return response;
     }
 
     @RequestMapping(value = "/job/stop", method = RequestMethod.GET)
-    public void stopJob() throws Exception {
+    public Response stopJob() throws Exception {
+        Response response = new Response();
         try {
-            Set<Long> executions = jobOperator.getRunningExecutions(importDataJob.getName());
+            // Stop the current job
+            jobOperator.stop(execution.getJobId());
 
-            if (executions != null && executions.size() > 0) {
-                jobOperator.stop(executions.iterator().next());
-                jobRegistry.unregister(importDataJob.getName());
-            } else {
-                LOGGER.info("No executions found !");
-            }
+            // Unregister the job from registry
+            jobRegistry.unregister(importDataJob.getName());
+
+            // Response object
+            response.setStatusCode(200);
+            response.setMessage("Job stopped !");
         } catch (NoSuchJobException e) {
             LOGGER.error("{}", e.getMessage());
+            response.setStatusCode(400);
+            response.setMessage("Something went wrong with job !");
+            response.setData(e);
         }
+        return response;
     }
 
     /**
@@ -114,53 +135,62 @@ public class DataController {
      * @throws Exception
      */
     @RequestMapping(value = "/job/status", method = RequestMethod.GET)
-    public Executions getJobStatus() throws Exception {
+    public Response getJobStatus() throws Exception {
 
+        Response response = new Response();
         Executions executions = new Executions();
 
         try {
             Set<Long> runningExecutions = jobOperator.getRunningExecutions(importDataJob.getName());
 
             if (runningExecutions != null && runningExecutions.size() > 0) {
-                Map<Long, String> jobInfo = jobOperator.getStepExecutionSummaries(runningExecutions.iterator().next());
-                String infos = jobInfo.get(0L);
-                LOGGER.info("{}", infos);
+                Map<Long, String> jobInfo = jobOperator.getStepExecutionSummaries(execution.getJobId());
 
-                if(infos != null) {
+                String result = null;
 
-                    for (String item : infos.split(":")[1].split(",")) {
-                        //LOGGER.info(item);
-                        String[] value = item.split("=");
+                for(String value : jobInfo.values()) {
+                    result = value;
+                }
 
-//                    LOGGER.info("{} != {}", "status", value[0]);
-//                    LOGGER.info("{} != {}", "status".getClass().getName(), value[0].getClass().getName());
+                LOGGER.info("Result : {}", result);
 
-                        if ("status".equals(value[0])) {
-                            LOGGER.info("{} : {}", value[0], value[1]);
-                            executions.setStatus(value[1]);
+                // Parse executions info for HTTP response
+                if (result != null) {
+                    Pattern p = Pattern.compile("(\\w+)=\"*((?<=\")[^\"]+(?=\")|([^\\s]+))\"*");
+                    Matcher m = p.matcher(result);
+
+                    while (m.find()) {
+//                        LOGGER.info("{} : {}", m.group(1), m.group(2));
+
+                        if ("status".equals(m.group(1))) {
+                            executions.setStatus(m.group(2));
                         }
-                        if ("exitStatus".equals(value[0])) {
-                            LOGGER.info("{} : {}", value[0], value[1]);
-                            executions.setExitStatus(value[1]);
+                        if ("exitStatus".equals(m.group(1))) {
+                            executions.setExitStatus(m.group(2));
                         }
-                        if ("readCount".equals(value[0])) {
-                            LOGGER.info("{} : {}", value[0], value[1]);
-                            executions.setReadCount(value[1]);
+                        if ("readCount".equals(m.group(1))) {
+                            executions.setReadCount(m.group(2));
                         }
-                        if ("writeCount".equals(value[0])) {
-                            LOGGER.info("{} : {}", value[0], value[1]);
-                            executions.setWriteCount(value[1]);
+                        if ("writeCount".equals(m.group(1))) {
+                            executions.setWriteCount(m.group(2));
                         }
                     }
+
+                    response.setStatusCode(200);
+                    response.setMessage("Info !");
+                    response.setData(executions);
                 }
             } else {
                 LOGGER.info("No executions found !");
             }
         } catch (NoSuchJobException | IndexOutOfBoundsException e) {
             LOGGER.error("{}", e.getMessage());
+            response.setStatusCode(400);
+            response.setMessage("Something went wrong with job !");
+            response.setData(e);
         }
 
-        return executions;
+        return response;
     }
 
     /**
