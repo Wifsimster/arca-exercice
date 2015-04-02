@@ -75,6 +75,20 @@ public class DataController {
     private JobExecution execution;
 
     /**
+     * Rest service for Junit
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    public Response testRest() throws Exception {
+        Response response = new Response();
+        response.setStatusCode(200);
+        response.setMessage("test");
+        response.setData(null);
+        return response;
+    }
+
+    /**
      * Run data import job within a Web Container
      *
      * @throws Exception
