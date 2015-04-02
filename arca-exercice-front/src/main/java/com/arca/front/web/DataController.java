@@ -3,7 +3,7 @@ package com.arca.front.web;
 import com.arca.front.bean.Data;
 import com.arca.front.bean.Executions;
 import com.arca.front.bean.Response;
-import com.arca.front.domain.DataList;
+import com.arca.front.bean.DataList;
 import com.arca.front.repository.DataRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

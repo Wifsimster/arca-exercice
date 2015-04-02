@@ -26,9 +26,9 @@
         <org.mongodb.morphia.version>0.110</org.mongodb.morphia.version>
         <com.kolich.common.version>0.3</com.kolich.common.version>
         <jetty.version>9.2.10.v20150310</jetty.version>
-        <vaadin.version>7.4.2</vaadin.version>
-        <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
+        <spring.test.version>4.1.6.RELEASE</spring.test.version>
         <joda.time.version>2.7</joda.time.version>
+        <junit.version>4.10</junit.version>
 
         <project.source.version>1.7</project.source.version>
         <project.target.version>1.7</project.target.version>

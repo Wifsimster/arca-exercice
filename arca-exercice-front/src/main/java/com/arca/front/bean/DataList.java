@@ -1,4 +1,4 @@
-package com.arca.front.domain;
+package com.arca.front.bean;
 
 import com.arca.front.bean.Data;
 
