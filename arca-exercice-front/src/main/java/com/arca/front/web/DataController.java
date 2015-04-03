@@ -1,16 +1,13 @@
 package com.arca.front.web;
 
 import com.arca.front.bean.Data;
+import com.arca.front.bean.DataList;
 import com.arca.front.bean.Executions;
 import com.arca.front.bean.Response;
-import com.arca.front.bean.DataList;
 import com.arca.front.repository.DataRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.DuplicateJobException;
 import org.springframework.batch.core.configuration.JobFactory;
 import org.springframework.batch.core.configuration.JobRegistry;
@@ -76,6 +73,7 @@ public class DataController {
 
     /**
      * Rest service for Junit
+     *
      * @return
      * @throws Exception
      */
@@ -105,12 +103,16 @@ public class DataController {
             // Start async the job with timestamp parameter
             execution = asyncJobLauncher.run(importDataJob, createInitialJobParameterMap());
 
+            LOGGER.info("Job status : {}", execution.getStatus());
+
+
             // Response object
             response.setStatusCode(200);
             response.setMessage("Status : " + execution.getStatus());
             response.setData(execution);
-        } catch (NoSuchJobException | DuplicateJobException e) {
-            LOGGER.error("{}", e.getMessage());
+
+        } catch (NoSuchJobException | DuplicateJobException | IllegalStateException e) {
+            LOGGER.error("Error : {}", e.getMessage());
             response.setStatusCode(400);
             response.setMessage("Something went wrong with job !");
             response.setData(e);
@@ -162,7 +164,7 @@ public class DataController {
 
                 String result = null;
 
-                for(String value : jobInfo.values()) {
+                for (String value : jobInfo.values()) {
                     result = value;
                 }
 

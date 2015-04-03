@@ -51,7 +51,7 @@ public class BatchConfiguration {
         FlatFileItemReader<DataTxt> reader = new FlatFileItemReader<DataTxt>();
         reader.setEncoding("UTF-8");
         //final ClassPathResource resource = new ClassPathResource("data.txt");
-        final FileSystemResource resource = new FileSystemResource("C:\\Users\\Wifsimster\\mercurial\\arca-exercice\\data.txt");
+        final FileSystemResource resource = new FileSystemResource("D:\\data2.txt");
         reader.setResource(resource);
         reader.setLineMapper(new DefaultLineMapper<DataTxt>() {{
             setLineTokenizer(new DelimitedLineTokenizer() {{

@@ -55,7 +55,7 @@
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
             <h1 class="page-header">Dashboard</h1>
 
-            <button type="submit" ng-show="!execution" class="btn btn-lg btn-primary" ng-click="extract()">Launch batch</button>
+            <button type="submit" ng-show="!execution" class="btn btn-lg btn-primary" ng-click="start()">Launch batch</button>
             <button type="submit" ng-show="execution" class="btn btn-lg btn-danger" ng-click="stop()">Stop batch</button>
             <button type="submit" ng-show="execution" class="btn btn-lg warning" ng-click="status()">Status batch</button>
 
@@ -79,7 +79,7 @@
                     </tbody>
                 </table>
                 <div tasty-pagination></div>
-            </div>
+            </divng-show>
         </div>
         <toaster-container toaster-options="{'position-class': 'toast-bottom-right'}"></toaster-container>
     </div>

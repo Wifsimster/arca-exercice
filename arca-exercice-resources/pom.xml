@@ -11,13 +11,14 @@
     <artifactId>arca-exercice-resources</artifactId>
 
     <build>
+        <filters>
+            <filter>src/main/filters/filter-dev.properties</filter>
+        </filters>
+
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
-                <excludes>
-                    <exclude>*.orig</exclude>
-                </excludes>
             </resource>
         </resources>
 
@@ -26,9 +27,5 @@
                 <directory>src/test/resources</directory>
             </testResource>
         </testResources>
-
-        <filters>
-            <filter>src/main/filters/filter-dev.properties</filter>
-        </filters>
     </build>
 </project>

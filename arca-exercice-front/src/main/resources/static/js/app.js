@@ -52,8 +52,9 @@ angular.module('ArcaApp', ['ngTasty', 'toaster'])
         // Batch state
         $scope.execution = false;
 
-        $scope.extract = function () {
+        $scope.start = function () {
             $http.get('/job/start').then(function (response) {
+                console.log(response);
                 if (response.status == 200) {
                     if (response.data.statusCode == 200) {
                         toaster.pop('success', "Success", response.data.message);

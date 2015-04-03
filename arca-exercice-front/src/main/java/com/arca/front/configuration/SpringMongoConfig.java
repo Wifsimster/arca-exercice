@@ -17,15 +17,14 @@ public class SpringMongoConfig {
     private static final int PORT = Integer.valueOf(bundleConfigApplication.getString("db.port"));
     private static final String DB_NAME = bundleConfigApplication.getString("db.name");
 
-    public
     @Bean
-    MongoDbFactory mongoDbFactory() throws Exception {
+    public MongoDbFactory mongoDbFactory() throws Exception {
         return new SimpleMongoDbFactory(new MongoClient(ADDRESS, PORT), DB_NAME);
     }
 
-    public
+
     @Bean
-    MongoTemplate mongoTemplate() throws Exception {
+    public MongoTemplate mongoTemplate() throws Exception {
         MongoTemplate mongoTemplate = new MongoTemplate(mongoDbFactory());
         return mongoTemplate;
     }
