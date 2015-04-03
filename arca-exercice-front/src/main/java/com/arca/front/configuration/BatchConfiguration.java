@@ -44,6 +44,7 @@ public class BatchConfiguration {
     private static final String ADDRESS = bundleConfigApplication.getString("db.address");
     private static final int PORT = Integer.valueOf(bundleConfigApplication.getString("db.port"));
     private static final String DB_NAME = bundleConfigApplication.getString("db.name");
+    private static final String DATA_FILE = bundleConfigApplication.getString("file.path");
 
     // tag::readerwriterprocessor[]
     @Bean
@@ -51,7 +52,7 @@ public class BatchConfiguration {
         FlatFileItemReader<DataTxt> reader = new FlatFileItemReader<DataTxt>();
         reader.setEncoding("UTF-8");
         //final ClassPathResource resource = new ClassPathResource("data.txt");
-        final FileSystemResource resource = new FileSystemResource("D:\\data2.txt");
+        final FileSystemResource resource = new FileSystemResource("D:\\data.txt");
         reader.setResource(resource);
         reader.setLineMapper(new DefaultLineMapper<DataTxt>() {{
             setLineTokenizer(new DelimitedLineTokenizer() {{
@@ -136,11 +137,12 @@ public class BatchConfiguration {
 
         return stepBuilderFactory.get("step1")
                 .<DataTxt, Data>chunk(10)
+                .faultTolerant()
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
                 .listener(itemReadListener)
-                .faultTolerant().skip(Exception.class).skipLimit(200000)
+                //.faultTolerant().skip(Exception.class).skipLimit(200000)
                 .build();
     }
     // end::jobstep[]

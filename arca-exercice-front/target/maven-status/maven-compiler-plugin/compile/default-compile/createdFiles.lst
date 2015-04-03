@@ -1,2 +1,16 @@
-com\arca\front\DataController.class
+com\arca\front\repository\DataRepository.class
+com\arca\front\bean\DataTxt.class
+com\arca\front\configuration\BatchConfiguration.class
+com\arca\front\web\DataController.class
+com\arca\front\configuration\BatchConfiguration$1$1.class
+com\arca\front\processor\DataItemProcessor.class
+com\arca\front\bean\DataList.class
 com\arca\front\Application.class
+com\arca\front\configuration\AdditionalBatchConfiguration.class
+com\arca\front\bean\Response.class
+com\arca\front\configuration\BatchConfiguration$1$2.class
+com\arca\front\bean\Data.class
+com\arca\front\configuration\BatchConfiguration$2.class
+com\arca\front\configuration\BatchConfiguration$1.class
+com\arca\front\bean\Executions.class
+com\arca\front\configuration\SpringMongoConfig.class

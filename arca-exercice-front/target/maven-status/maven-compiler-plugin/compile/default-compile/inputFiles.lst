@@ -1,2 +1,12 @@
-C:\Users\Wifsimster\mercurial\arca-exercice\arca-exercice-front\src\main\java\com\arca\front\DataController.java
+C:\Users\Wifsimster\mercurial\arca-exercice\arca-exercice-front\src\main\java\com\arca\front\configuration\SpringMongoConfig.java
+C:\Users\Wifsimster\mercurial\arca-exercice\arca-exercice-front\src\main\java\com\arca\front\bean\DataTxt.java
+C:\Users\Wifsimster\mercurial\arca-exercice\arca-exercice-front\src\main\java\com\arca\front\bean\Data.java
+C:\Users\Wifsimster\mercurial\arca-exercice\arca-exercice-front\src\main\java\com\arca\front\configuration\BatchConfiguration.java
+C:\Users\Wifsimster\mercurial\arca-exercice\arca-exercice-front\src\main\java\com\arca\front\configuration\AdditionalBatchConfiguration.java
+C:\Users\Wifsimster\mercurial\arca-exercice\arca-exercice-front\src\main\java\com\arca\front\processor\DataItemProcessor.java
 C:\Users\Wifsimster\mercurial\arca-exercice\arca-exercice-front\src\main\java\com\arca\front\Application.java
+C:\Users\Wifsimster\mercurial\arca-exercice\arca-exercice-front\src\main\java\com\arca\front\bean\DataList.java
+C:\Users\Wifsimster\mercurial\arca-exercice\arca-exercice-front\src\main\java\com\arca\front\repository\DataRepository.java
+C:\Users\Wifsimster\mercurial\arca-exercice\arca-exercice-front\src\main\java\com\arca\front\bean\Executions.java
+C:\Users\Wifsimster\mercurial\arca-exercice\arca-exercice-front\src\main\java\com\arca\front\bean\Response.java
+C:\Users\Wifsimster\mercurial\arca-exercice\arca-exercice-front\src\main\java\com\arca\front\web\DataController.java

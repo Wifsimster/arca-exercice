@@ -103,14 +103,19 @@ public class DataController {
             // Start async the job with timestamp parameter
             execution = asyncJobLauncher.run(importDataJob, createInitialJobParameterMap());
 
-            LOGGER.info("Job status : {}", execution.getStatus());
+            final ExitStatus status = execution.getExitStatus();
 
+            LOGGER.info("Status : {}", status.getExitCode());
 
-            // Response object
-            response.setStatusCode(200);
-            response.setMessage("Status : " + execution.getStatus());
-            response.setData(execution);
-
+            if(ExitStatus.COMPLETED.getExitCode().equals(status.getExitCode())) {
+                // Response object
+                response.setStatusCode(200);
+                response.setMessage("Job started !");
+                response.setData(execution);
+            } else {
+                response.setStatusCode(400);
+                response.setMessage("Something went wrong with job !");
+            }
         } catch (NoSuchJobException | DuplicateJobException | IllegalStateException e) {
             LOGGER.error("Error : {}", e.getMessage());
             response.setStatusCode(400);
