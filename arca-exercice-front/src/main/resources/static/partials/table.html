@@ -1,19 +1,4 @@
-<table class="table table-striped">
-    <thead>
-    <tr>
-        <th>Country</th>
-        <th>Sum</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr ng-repeat="country in countries">
-        <td>{{data.country}}</td>
-        <td>{{data.sum}}</td>
-    </tr>
-    </tbody>
-</table>
-
-<h2 class="sub-header">Data</h2>
+<h2 class="sub-header">All data</h2>
 
 <div class="table-responsive" tasty-table bind-resource-callback="getResource" bind-init="init">
     <table class="table table-striped">
@@ -34,3 +19,20 @@
     </table>
     <div tasty-pagination></div>
 </div>
+
+<h2 class="sub-header">Distinct countries with sum values</h2>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Country</th>
+        <th>Sum</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="data in sumCountries">
+        <td>{{data.country}}</td>
+        <td>{{data.sum}}</td>
+    </tr>
+    </tbody>
+</table>

@@ -18,10 +18,6 @@ app.controller('TableCtrl', function ($scope, $http, toaster) {
         {
             "key": "country",
             "name": "Country"
-        },
-        {
-            "key": "line",
-            "name": "Line"
         }
     ];
 
@@ -49,9 +45,18 @@ app.controller('TableCtrl', function ($scope, $http, toaster) {
 
     // Get countries list
     $http.get('/sum/by/country').then(function (response) {
-        console.log(response);
-        var data = JSON.parse(response);
-        console.log(data);
+        if (response.status == 200) {
 
+            var sumCountries = [];
+
+            $.map(response.data, function (value, index) {
+                sumCountries.push({country: index, sum: value});
+            });
+
+            $scope.sumCountries = sumCountries;
+
+        } else {
+            console.error(response);
+        }
     });
 });

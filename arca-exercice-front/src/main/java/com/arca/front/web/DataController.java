@@ -284,8 +284,8 @@ public class DataController {
         DBObject project = new BasicDBObject("$project", fields);
 
         // Sum the value of each country
-        DBObject groupFields = new BasicDBObject( "_id", "$country");
-        groupFields.put("sum", new BasicDBObject( "$sum", "$value"));
+        DBObject groupFields = new BasicDBObject("_id", "$country");
+        groupFields.put("sum", new BasicDBObject("$sum", "$value"));
         DBObject group = new BasicDBObject("$group", groupFields);
 
         // Sort by country
@@ -298,9 +298,7 @@ public class DataController {
         Map<String, String> resultMap = new HashMap<>();
 
         for (DBObject result : output.results()) {
-            LOGGER.info("{} : {}", result.get("_id"), result.get("sum"));
             resultMap.put(String.valueOf(result.get("_id")), String.valueOf(result.get("sum")));
-
         }
 
         return resultMap;
