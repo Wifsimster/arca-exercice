@@ -31,6 +31,8 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 
+import java.util.ResourceBundle;
+
 @Configuration
 @EnableBatchProcessing
 @Import(AdditionalBatchConfiguration.class)
@@ -38,11 +40,10 @@ public class BatchConfiguration {
 
     // Slf4j logger
     private final static Logger LOGGER = LoggerFactory.getLogger(BatchConfiguration.class);
-    //    private static ResourceBundle bundleConfigApplication = ResourceBundle.getBundle("application");
-//    private static final String ADDRESS = bundleConfigApplication.getString("db.address");
-//    private static final int PORT = Integer.valueOf(bundleConfigApplication.getString("db.port"));
-//    private static final String DB_NAME = bundleConfigApplication.getString("db.name");
-    private static final String DB_NAME = "arca";
+    private static ResourceBundle bundleConfigApplication = ResourceBundle.getBundle("application");
+    private static final String ADDRESS = bundleConfigApplication.getString("db.address");
+    private static final int PORT = Integer.valueOf(bundleConfigApplication.getString("db.port"));
+    private static final String DB_NAME = bundleConfigApplication.getString("db.name");
 
     // tag::readerwriterprocessor[]
     @Bean
@@ -89,7 +90,7 @@ public class BatchConfiguration {
     @Bean
     public MongoDbFactory mongoDbFactory() throws Exception {
         //LOGGER.info("MongoDB({}:{})", ADDRESS, PORT);
-        MongoClient client = new MongoClient();
+        MongoClient client = new MongoClient(ADDRESS, PORT);
         return new SimpleMongoDbFactory(client, DB_NAME);
     }
 

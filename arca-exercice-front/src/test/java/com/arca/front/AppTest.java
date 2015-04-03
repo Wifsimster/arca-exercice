@@ -8,12 +8,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.mockito.Mockito.*;
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -55,7 +53,7 @@ public class AppTest {
     @Test
     public void testBadRequest() throws Exception {
         mockMvc.perform(get("/test2"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().is4xxClientError());
     }
 
 
@@ -72,5 +70,13 @@ public class AppTest {
     public void downUp() {
         this.mockMvc = null;
     }
+
+    // Test start job
+
+    // Test stop job
+
+    // Test getting job info
+
+    // Test job resume with data coherence
 
 }

@@ -20,12 +20,13 @@
                 </excludes>
             </resource>
         </resources>
+
         <testResources>
             <testResource>
-                <filtering>true</filtering>
                 <directory>src/test/resources</directory>
             </testResource>
         </testResources>
+
         <filters>
             <filter>src/main/filters/filter-dev.properties</filter>
         </filters>
