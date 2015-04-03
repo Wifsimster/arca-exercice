@@ -2,6 +2,7 @@ package com.arca.front.bean;
 
 import com.arca.front.bean.Data;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -9,7 +10,7 @@ import java.util.List;
  */
 public class DataList {
 
-    private List<Data> dataEntities;
+    private Collection<Data> dataEntities;
     private int page;
     private int count;
     private int pages;
@@ -17,11 +18,11 @@ public class DataList {
     private String sortBy;
     private String sortOrder;
 
-    public List<Data> getDataEntities() {
+    public Collection<Data> getDataEntities() {
         return dataEntities;
     }
 
-    public void setDataEntities(List<Data> dataEntities) {
+    public void setDataEntities(Collection<Data> dataEntities) {
         this.dataEntities = dataEntities;
     }
 

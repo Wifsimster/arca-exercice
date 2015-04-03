@@ -5,6 +5,9 @@ import com.arca.front.bean.DataList;
 import com.arca.front.bean.Executions;
 import com.arca.front.bean.Response;
 import com.arca.front.repository.DataRepository;
+import com.mongodb.AggregationOutput;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
@@ -17,15 +20,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.batch.operations.NoSuchJobException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -107,7 +109,7 @@ public class DataController {
 
             LOGGER.info("Status : {}", status.getExitCode());
 
-            if(ExitStatus.COMPLETED.getExitCode().equals(status.getExitCode())) {
+            if (ExitStatus.COMPLETED.getExitCode().equals(status.getExitCode())) {
                 // Response object
                 response.setStatusCode(200);
                 response.setMessage("Job started !");
@@ -237,6 +239,71 @@ public class DataController {
         dataList.setSortOrder("asc");
 
         return dataList;
+    }
+
+    @Autowired
+    MongoTemplate mongoTemplate;
+
+    /**
+     * Get countries list with pagination
+     *
+     * @param page
+     * @param count
+     * @return
+     */
+    @RequestMapping(value = "/country?page={page}&count={count}", method = RequestMethod.GET)
+    public DataList getDistinctCountry(@PathVariable int page, @PathVariable int count) {
+
+        DataList dataList = new DataList();
+        List<Data> data = mongoTemplate.getCollection("data").distinct("country");
+
+        // Build response object
+        dataList.setCount(count);
+        dataList.setPage(page);
+        dataList.setPages(count / data.size());
+        dataList.setSize(data.size());
+        dataList.setDataEntities(data);
+        dataList.setSortBy("timestamp");
+        dataList.setSortOrder("asc");
+
+        return dataList;
+    }
+
+    /**
+     * Get countries list
+     *
+     * @return
+     */
+    @RequestMapping(value = "/sum/by/country", method = RequestMethod.GET)
+    public Map<String, String> getValueSumByDistinctCountry() {
+
+        // Build the $projection operation
+        DBObject fields = new BasicDBObject("country", 1);
+        fields.put("value", 1);
+        fields.put("_id", 0);
+        DBObject project = new BasicDBObject("$project", fields);
+
+        // Sum the value of each country
+        DBObject groupFields = new BasicDBObject( "_id", "$country");
+        groupFields.put("sum", new BasicDBObject( "$sum", "$value"));
+        DBObject group = new BasicDBObject("$group", groupFields);
+
+        // Sort by country
+        DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", -1));
+
+        // Run aggregation
+        List<DBObject> pipeline = Arrays.asList(project, group, sort);
+        AggregationOutput output = mongoTemplate.getCollection("data").aggregate(pipeline);
+
+        Map<String, String> resultMap = new HashMap<>();
+
+        for (DBObject result : output.results()) {
+            LOGGER.info("{} : {}", result.get("_id"), result.get("sum"));
+            resultMap.put(String.valueOf(result.get("_id")), String.valueOf(result.get("sum")));
+
+        }
+
+        return resultMap;
     }
 
 }

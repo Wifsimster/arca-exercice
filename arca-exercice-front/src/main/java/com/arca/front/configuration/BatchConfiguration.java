@@ -1,5 +1,6 @@
 package com.arca.front.configuration;
 
+import com.arca.front.JobFailureListener;
 import com.arca.front.bean.Data;
 import com.arca.front.bean.DataTxt;
 import com.arca.front.processor.DataItemProcessor;
@@ -52,7 +53,7 @@ public class BatchConfiguration {
         FlatFileItemReader<DataTxt> reader = new FlatFileItemReader<DataTxt>();
         reader.setEncoding("UTF-8");
         //final ClassPathResource resource = new ClassPathResource("data.txt");
-        final FileSystemResource resource = new FileSystemResource("D:\\data.txt");
+        final FileSystemResource resource = new FileSystemResource("D:\\datae.txt");
         reader.setResource(resource);
         reader.setLineMapper(new DefaultLineMapper<DataTxt>() {{
             setLineTokenizer(new DelimitedLineTokenizer() {{
@@ -118,7 +119,7 @@ public class BatchConfiguration {
 
     @Bean
     public Step step1(StepBuilderFactory stepBuilderFactory, ItemReader<DataTxt> reader,
-                      ItemWriter<Data> writer, ItemProcessor<DataTxt, Data> processor) {
+                      ItemWriter<Data> writer, ItemProcessor<DataTxt, Data> processor, JobFailureListener jobFailureListener) {
 
         ItemReadListener<DataTxt> itemReadListener = new ItemReadListener<DataTxt>() {
             @Override
@@ -137,12 +138,14 @@ public class BatchConfiguration {
 
         return stepBuilderFactory.get("step1")
                 .<DataTxt, Data>chunk(10)
-                .faultTolerant()
+                .faultTolerant().skip(Exception.class)
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
                 .listener(itemReadListener)
-                //.faultTolerant().skip(Exception.class).skipLimit(200000)
+                .listener(jobFailureListener)
+                //.faultTolerant()
+                // .skip(Exception.class).skipLimit(200000)
                 .build();
     }
     // end::jobstep[]
