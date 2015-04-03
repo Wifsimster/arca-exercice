@@ -43,6 +43,8 @@ app.controller('TableCtrl', function ($scope, $http, toaster) {
         });
     };
 
+    $scope.loading = false;
+
     // Get countries list
     $http.get('/sum/by/country').then(function (response) {
         if (response.status == 200) {
@@ -54,6 +56,7 @@ app.controller('TableCtrl', function ($scope, $http, toaster) {
             });
 
             $scope.sumCountries = sumCountries;
+            $scope.loading = true;
 
         } else {
             console.error(response);

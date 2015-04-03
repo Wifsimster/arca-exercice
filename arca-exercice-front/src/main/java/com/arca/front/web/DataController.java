@@ -289,7 +289,7 @@ public class DataController {
         DBObject group = new BasicDBObject("$group", groupFields);
 
         // Sort by country
-        DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", -1));
+        DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", 1));
 
         // Run aggregation
         List<DBObject> pipeline = Arrays.asList(project, group, sort);
