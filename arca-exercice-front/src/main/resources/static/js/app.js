@@ -1,4 +1,4 @@
-var app = angular.module('ArcaApp', ['ngTasty', 'toaster', 'ngRoute', 'Chart']);
+var app = angular.module('ArcaApp', ['ngTasty', 'toaster', 'ngRoute', 'nvd3']);
 
 // App configuration
 app.config(['$routeProvider', '$locationProvider',
