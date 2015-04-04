@@ -20,6 +20,7 @@ app.controller('ChartCtrl', function ($scope, $http, $filter) {
             y: function (d) {
                 return d.y;
             },
+            autorefresh: true,
             useInteractiveGuideline: true,
             xAxis: {
                 axisLabel: 'Date',
@@ -42,7 +43,7 @@ app.controller('ChartCtrl', function ($scope, $http, $filter) {
 
     $scope.data = [{
         key: "Data",
-        values: [{"x":"2008-12-13","y":"78"},{"x":"2008-12-14","y":"18"},{"x":"2008-12-15","y":"61"}]
+        values: []
     }];
 
      //Get days list
@@ -58,10 +59,7 @@ app.controller('ChartCtrl', function ($scope, $http, $filter) {
             $scope.sumByDay = sumByDay;
             $scope.loading = true;
 
-            //$scope.data = [{
-            //    key: "Data",
-            //    values: [sumByDay]
-            //}];
+            $scope.data[0].values = sumByDay;
 
         } else {
             console.error(response);
