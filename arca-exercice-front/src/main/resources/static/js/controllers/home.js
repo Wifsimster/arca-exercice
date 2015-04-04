@@ -1,7 +1,7 @@
-app.controller('HomeCtrl', function ($scope, $http, toaster) {
+app.controller('HomeCtrl', function ($rootScope, $scope, $http, toaster) {
 
     // Batch state
-    $scope.execution = false;
+    $rootScope.execution = false;
 
     $scope.start = function () {
         $http.get('/job/start').then(function (response) {
@@ -9,7 +9,7 @@ app.controller('HomeCtrl', function ($scope, $http, toaster) {
             if (response.status == 200) {
                 if (response.data.statusCode == 200) {
                     toaster.pop('success', "Success", response.data.message);
-                    $scope.execution = true;
+                    $rootScope.execution = true;
                 } else {
                     toaster.pop('error', "Error", response.data.message);
                 }
@@ -23,7 +23,7 @@ app.controller('HomeCtrl', function ($scope, $http, toaster) {
         $http.get('/job/stop').then(function (response) {
             if (response.status == 200) {
                 if (response.data.statusCode == 200) {
-                    $scope.execution = false;
+                    $rootScope.execution = false;
                     toaster.pop('success', "Success", response.data.message);
                 } else {
                     toaster.pop('error', "Error", response.data.message);
