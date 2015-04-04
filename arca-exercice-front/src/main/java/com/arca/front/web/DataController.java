@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.batch.operations.NoSuchJobException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -109,15 +110,15 @@ public class DataController {
 
             LOGGER.info("Status : {}", status.getExitCode());
 
-            if (ExitStatus.COMPLETED.getExitCode().equals(status.getExitCode())) {
+//            if (ExitStatus.COMPLETED.getExitCode().equals(status.getExitCode())) {
                 // Response object
                 response.setStatusCode(200);
                 response.setMessage("Job started !");
                 response.setData(execution);
-            } else {
-                response.setStatusCode(400);
-                response.setMessage("Something went wrong with job !");
-            }
+//            } else {
+//                response.setStatusCode(400);
+//                response.setMessage("Something went wrong with job !");
+//            }
         } catch (NoSuchJobException | DuplicateJobException | IllegalStateException e) {
             LOGGER.error("Error : {}", e.getMessage());
             response.setStatusCode(400);
@@ -299,6 +300,42 @@ public class DataController {
 
         for (DBObject result : output.results()) {
             resultMap.put(String.valueOf(result.get("_id")), String.valueOf(result.get("sum")));
+        }
+
+        return resultMap;
+    }
+
+    /**
+     * Get sum of values by day
+     *
+     * @return
+     */
+    @RequestMapping(value = "/sum/by/day", method = RequestMethod.GET)
+    public Map<String, String> getSumByDay() {
+
+        // Build the $projection operation
+        DBObject fields = new BasicDBObject("date", 1);
+        fields.put("value", 1);
+        fields.put("_id", 0);
+        DBObject project = new BasicDBObject("$project", fields);
+
+        // Sum the value of each date
+        DBObject groupFields = new BasicDBObject("_id", "$date");
+        groupFields.put("sum", new BasicDBObject("$sum", "$value"));
+        DBObject group = new BasicDBObject("$group", groupFields);
+
+        // Sort by country
+        DBObject sort = new BasicDBObject("$sort", new BasicDBObject("date", -1));
+
+        // Run aggregation
+        List<DBObject> pipeline = Arrays.asList(project, group, sort);
+        AggregationOutput output = mongoTemplate.getCollection("data").aggregate(pipeline);
+
+        Map<String, String> resultMap = new HashMap<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        for (DBObject result : output.results()) {
+            resultMap.put(sdf.format(result.get("_id")), String.valueOf(result.get("sum")));
         }
 
         return resultMap;

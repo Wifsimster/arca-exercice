@@ -56,7 +56,6 @@ public class AppTest {
                 .andExpect(status().is4xxClientError());
     }
 
-
     /**
      * Test MongoDB communication
      */
@@ -64,6 +63,21 @@ public class AppTest {
     public void testDatabase() {
         long count = dataRepository.count();
         assertNotNull(count);
+    }
+
+    @Test
+    public void testSumByCountry() throws Exception {
+        mockMvc.perform(get("/sum/by/country"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"));
+    }
+
+
+    @Test
+    public void testSumByDay() throws Exception {
+        mockMvc.perform(get("/sym/by/day"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=UTF-8"));
     }
 
     @After

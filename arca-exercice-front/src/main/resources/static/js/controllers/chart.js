@@ -1,8 +1,12 @@
-app.controller('ChartCtrl', function ($scope, $http, toaster) {
+app.controller('ChartCtrl', function ($scope, $http, $filter) {
 
+    $scope.loading = true;
+
+
+    // Example
     $scope.options = {
         chart: {
-            type: 'discreteBarChart',
+            type: 'lineChart',
             height: 450,
             margin: {
                 top: 20,
@@ -11,38 +15,56 @@ app.controller('ChartCtrl', function ($scope, $http, toaster) {
                 left: 55
             },
             x: function (d) {
-                return d.label;
+                return new Date(d.x);
             },
             y: function (d) {
-                return d.value;
+                return d.y;
             },
-            showValues: true,
-            valueFormat: function (d) {
-                return d3.format(',.4f')(d);
-            },
-            transitionDuration: 500,
+            useInteractiveGuideline: true,
             xAxis: {
-                axisLabel: 'X Axis'
+                axisLabel: 'Date',
+                tickFormat : function(d) {
+                    return d3.time.format('%x')(new Date(d));
+                }
             },
             yAxis: {
-                axisLabel: 'Y Axis',
-                axisLabelDistance: 30
+                axisLabel: 'Value'
+            },
+            callback: function (chart) {
+                console.log("!!! lineChart callback !!!");
             }
+        },
+        title: {
+            enable: true,
+            text: 'Sum by date'
         }
     };
 
     $scope.data = [{
-        key: "Cumulative Return",
-        values: [
-            {"label": "A", "value": -29.765957771107},
-            {"label": "B", "value": 0},
-            {"label": "C", "value": 32.807804682612},
-            {"label": "D", "value": 196.45946739256},
-            {"label": "E", "value": 0.19434030906893},
-            {"label": "F", "value": -98.079782601442},
-            {"label": "G", "value": -13.925743130903},
-            {"label": "H", "value": -5.1387322875705}
-        ]
+        key: "Data",
+        values: [{"x":"2008-12-13","y":"78"},{"x":"2008-12-14","y":"18"},{"x":"2008-12-15","y":"61"}]
     }];
 
+     //Get days list
+    $http.get('/sum/by/day').then(function (response) {
+        if (response.status == 200) {
+
+            var sumByDay = [];
+
+            $.map(response.data, function (value, index) {
+                sumByDay.push({x: index, y: value});
+            });
+
+            $scope.sumByDay = sumByDay;
+            $scope.loading = true;
+
+            //$scope.data = [{
+            //    key: "Data",
+            //    values: [sumByDay]
+            //}];
+
+        } else {
+            console.error(response);
+        }
+    });
 });
