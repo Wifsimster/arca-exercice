@@ -1,14 +1,5 @@
 app.controller('ChartCtrl', function ($rootScope, $scope, $http, $filter) {
 
-    // Get data count
-    $http.get('/data/count').then(function (response) {
-        if (response.status == 200) {
-            $rootScope.dataCount = response.data.data;
-        } else {
-            console.error(response);
-        }
-    });
-
     $scope.loaded = false;
 
     // Example

@@ -19,25 +19,21 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.batch.item.file.transform.FlatFileFormatException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.PropertySource;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
-
-import java.io.IOException;
 
 @Configuration
 @EnableBatchProcessing
@@ -62,20 +58,26 @@ public class BatchConfiguration {
     // tag::readerwriterprocessor[]
     @Bean
     public ItemReader<DataTxt> reader() {
+
         FlatFileItemReader<DataTxt> reader = new FlatFileItemReader<DataTxt>();
-        reader.setEncoding("UTF-8");
-        //final ClassPathResource resource = new ClassPathResource("data.txt");
-        LOGGER.info("Use data file : {]", DATA_FILE);
-        final FileSystemResource resource = new FileSystemResource(DATA_FILE);
-        reader.setResource(resource);
-        reader.setLineMapper(new DefaultLineMapper<DataTxt>() {{
-            setLineTokenizer(new DelimitedLineTokenizer() {{
-                setNames(new String[]{"timestamp", "value", "country"});
+
+        try {
+            reader.setEncoding("UTF-8");
+            //final ClassPathResource resource = new ClassPathResource("data.txt");
+            LOGGER.info("Use data file : {]", DATA_FILE);
+            final FileSystemResource resource = new FileSystemResource(DATA_FILE);
+            reader.setResource(resource);
+            reader.setLineMapper(new DefaultLineMapper<DataTxt>() {{
+                setLineTokenizer(new DelimitedLineTokenizer() {{
+                    setNames(new String[]{"timestamp", "value", "country"});
+                }});
+                setFieldSetMapper(new BeanWrapperFieldSetMapper<DataTxt>() {{
+                    setTargetType(DataTxt.class);
+                }});
             }});
-            setFieldSetMapper(new BeanWrapperFieldSetMapper<DataTxt>() {{
-                setTargetType(DataTxt.class);
-            }});
-        }});
+        } catch(FlatFileParseException e) {
+            LOGGER.error("Error : {}", e);
+        }
 
         return reader;
     }
@@ -151,14 +153,10 @@ public class BatchConfiguration {
 
         return stepBuilderFactory.get("step1")
                 .<DataTxt, Data>chunk(10)
-                .faultTolerant().skip(Exception.class)
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
                 .listener(itemReadListener)
-                .listener(jobFailureListener)
-                        //.faultTolerant()
-                        // .skip(Exception.class).skipLimit(200000)
                 .build();
     }
     // end::jobstep[]
