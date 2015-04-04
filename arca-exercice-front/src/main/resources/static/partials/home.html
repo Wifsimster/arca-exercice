@@ -1,11 +1,12 @@
 <h1 class="page-header">Dashboard</h1>
 
-<button type="submit" ng-show="!execution" class="btn btn-lg btn-primary" ng-click="start()">Launch batch</button>
-<button type="submit" ng-show="execution" class="btn btn-lg btn-danger" ng-click="stop()">Stop batch</button>
-<button type="submit" ng-show="execution" class="btn btn-lg warning" ng-click="status()">Status batch</button>
+<div>
+    <button type="submit" ng-show="!execution" class="btn btn-lg btn-primary" ng-click="start()">Launch batch</button>
+    <button type="submit" ng-show="execution" class="btn btn-lg btn-danger" ng-click="stop()">Stop batch</button>
+    <button type="submit" ng-show="execution" class="btn btn-lg warning" ng-click="status()">Status batch</button>
+</div>
 
-
-<br/>
+<br/><br/>
 
 <div ng-hide="dataCount > 0">
     <p class="well">No data found in database !</p>

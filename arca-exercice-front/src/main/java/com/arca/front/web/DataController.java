@@ -39,7 +39,7 @@ public class DataController implements ErrorController {
     // Slf4j logger
     private final static Logger LOGGER = LoggerFactory.getLogger(DataController.class);
 
-    private static final String PATH = "/error";
+    private final static String HOME_PATH = "index";
 
     @Autowired
     JobLauncher jobLauncher;
@@ -92,14 +92,9 @@ public class DataController implements ErrorController {
         return response;
     }
 
-    @RequestMapping(value = PATH)
-    public String error() {
-        return "redirect:/index.html";
-    }
-
     @Override
     public String getErrorPath() {
-        return PATH;
+        return "index";
     }
 
     /**
@@ -133,7 +128,7 @@ public class DataController implements ErrorController {
 //                response.setMessage("Something went wrong with job !");
 //            }
         } catch (NoSuchJobException | DuplicateJobException | IllegalStateException e) {
-            LOGGER.error("Error : {}", e.getMessage());
+            LOGGER.error("Error : {}", e);
             response.setStatusCode(400);
             response.setMessage("Something went wrong with job !");
             response.setData(e);
@@ -156,7 +151,7 @@ public class DataController implements ErrorController {
             response.setStatusCode(200);
             response.setMessage("Job stopped !");
         } catch (NoSuchJobException e) {
-            LOGGER.error("{}", e.getMessage());
+            LOGGER.error("{}", e);
             response.setStatusCode(400);
             response.setMessage("Something went wrong with job !");
             response.setData(e);

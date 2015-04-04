@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: Arca exercice
+  batch:
+    job:
+      enabled : false
+server:
+    port: 8080
+
+db:
+  name: arca
+  address: localhost
+  port: 27017
+
+file:
+  path: "C:\\data.txt"
