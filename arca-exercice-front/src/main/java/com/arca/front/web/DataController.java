@@ -325,13 +325,13 @@ public class DataController {
         DBObject group = new BasicDBObject("$group", groupFields);
 
         // Sort by country
-        DBObject sort = new BasicDBObject("$sort", new BasicDBObject("date", -1));
+        DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", -1));
 
         // Run aggregation
         List<DBObject> pipeline = Arrays.asList(project, group, sort);
         AggregationOutput output = mongoTemplate.getCollection("data").aggregate(pipeline);
 
-        Map<String, String> resultMap = new HashMap<>();
+        Map<String, String> resultMap = new TreeMap<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         for (DBObject result : output.results()) {
