@@ -1,7 +1,6 @@
 app.controller('ChartCtrl', function ($scope, $http, $filter) {
 
-    $scope.loading = true;
-
+    $scope.loaded = false;
 
     // Example
     $scope.options = {
@@ -57,7 +56,7 @@ app.controller('ChartCtrl', function ($scope, $http, $filter) {
             });
 
             $scope.sumByDay = sumByDay;
-            $scope.loading = true;
+            $scope.loaded = true;
 
             $scope.data[0].values = sumByDay;
 
