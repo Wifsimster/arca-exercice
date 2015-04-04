@@ -18,6 +18,7 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.web.ErrorController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -33,10 +34,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @RestController
-public class DataController {
+public class DataController implements ErrorController {
 
     // Slf4j logger
     private final static Logger LOGGER = LoggerFactory.getLogger(DataController.class);
+
+    private static final String PATH = "/error";
 
     @Autowired
     JobLauncher jobLauncher;
@@ -87,6 +90,16 @@ public class DataController {
         response.setMessage("test");
         response.setData(null);
         return response;
+    }
+
+    @RequestMapping(value = PATH)
+    public String error() {
+        return "redirect:/index.html";
+    }
+
+    @Override
+    public String getErrorPath() {
+        return PATH;
     }
 
     /**

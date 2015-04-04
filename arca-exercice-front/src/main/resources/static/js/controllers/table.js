@@ -1,4 +1,15 @@
-app.controller('TableCtrl', function ($scope, $http, toaster) {
+app.controller('TableCtrl', function ($rootScope, $scope, $http, toaster) {
+
+    // Get data count
+    $http.get('/data/count').then(function (response) {
+        console.log(response);
+        if (response.status == 200) {
+            $rootScope.dataCount = response.data.data;
+        } else {
+            console.error(response);
+        }
+    });
+
     $scope.init = {
         'count': 10,
         'page': 1,

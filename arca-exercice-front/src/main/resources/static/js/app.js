@@ -20,18 +20,10 @@ app.config(['$routeProvider', '$locationProvider',
         $locationProvider.html5Mode({enabled: true, requireBase: false});
     }]);
 
-app.controller('AppCtrl', function ($scope, $http) {
+app.controller('AppCtrl', function ($rootScope, $scope, $http) {
 
     $scope.url = "";
 
     $rootScope.dataCount = 0;
-
-    $http.get('/data/count').then(function (response) {
-        if (response.status == 200) {
-            $rootScope.dataCount = response.data;
-        } else {
-            console.error(response);
-        }
-    });
 
 });
