@@ -85,6 +85,8 @@ public class AppTest {
         this.mockMvc = null;
     }
 
+    // fyi : http://docs.spring.io/spring-batch/trunk/reference/html/testing.html
+
     // Test start job
 
     // Test stop job

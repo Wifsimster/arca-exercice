@@ -119,10 +119,10 @@ public class DataController implements ErrorController {
             LOGGER.info("Status : {}", status.getExitCode());
 
 //            if (ExitStatus.COMPLETED.getExitCode().equals(status.getExitCode())) {
-                // Response object
-                response.setStatusCode(200);
-                response.setMessage("Job started !");
-                response.setData(execution);
+            // Response object
+            response.setStatusCode(200);
+            response.setMessage("Job started !");
+            response.setData(execution);
 //            } else {
 //                response.setStatusCode(400);
 //                response.setMessage("Something went wrong with job !");
@@ -252,6 +252,7 @@ public class DataController implements ErrorController {
 
     /**
      * Return data count
+     *
      * @return
      */
     @RequestMapping(value = "/data/count", method = RequestMethod.GET)

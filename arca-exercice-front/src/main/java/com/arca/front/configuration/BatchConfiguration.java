@@ -1,6 +1,5 @@
 package com.arca.front.configuration;
 
-import com.arca.front.JobFailureListener;
 import com.arca.front.bean.Data;
 import com.arca.front.bean.DataTxt;
 import com.arca.front.processor.DataItemProcessor;
@@ -23,7 +22,6 @@ import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
-import org.springframework.batch.item.file.transform.FlatFileFormatException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -59,6 +57,9 @@ public class BatchConfiguration {
     @Bean
     public ItemReader<DataTxt> reader() {
 
+        // TODO : Create a custom ItemReader to keep trace of current index
+        // fyi : http://docs.spring.io/spring-batch/trunk/reference/html/readersAndWriters.html
+
         FlatFileItemReader<DataTxt> reader = new FlatFileItemReader<DataTxt>();
 
         try {
@@ -75,7 +76,7 @@ public class BatchConfiguration {
                     setTargetType(DataTxt.class);
                 }});
             }});
-        } catch(FlatFileParseException e) {
+        } catch (FlatFileParseException e) {
             LOGGER.error("Error : {}", e);
         }
 
@@ -134,7 +135,7 @@ public class BatchConfiguration {
 
     @Bean
     public Step step1(StepBuilderFactory stepBuilderFactory, ItemReader<DataTxt> reader,
-                      ItemWriter<Data> writer, ItemProcessor<DataTxt, Data> processor, JobFailureListener jobFailureListener) {
+                      ItemWriter<Data> writer, ItemProcessor<DataTxt, Data> processor) {
 
         ItemReadListener<DataTxt> itemReadListener = new ItemReadListener<DataTxt>() {
             @Override
