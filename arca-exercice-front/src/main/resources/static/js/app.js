@@ -24,4 +24,14 @@ app.controller('AppCtrl', function ($scope, $http) {
 
     $scope.url = "";
 
+    $rootScope.dataCount = 0;
+
+    $http.get('/data/count').then(function (response) {
+        if (response.status == 200) {
+            $rootScope.dataCount = response.data;
+        } else {
+            console.error(response);
+        }
+    });
+
 });

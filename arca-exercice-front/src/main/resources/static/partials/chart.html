@@ -1,11 +1,19 @@
 <h2 class="sub-header">Values by day</h2>
 
-<!-- Loading spinner -->
-<li ng-hide="loaded" class="list-unstyled sk-spinner sk-spinner-wandering-cubes">
-    <div class="sk-cube1"></div>
-    <div class="sk-cube2"></div>
-</li>
+<br/>
 
-<nvd3 options='options' data='data' ng-show="loaded" config="{refreshDataOnly: true}"></nvd3>
+<div ng-hide="dataCount > 0">
+    <p class="well">No data found in database !</p>
+</div>
 
-<pre ng-show="loaded">{{ sumByDay }}</pre>
+<div ng-show="dataCount > 0">
+    <!-- Loading spinner -->
+    <li ng-hide="loaded" class="list-unstyled sk-spinner sk-spinner-wandering-cubes">
+        <div class="sk-cube1"></div>
+        <div class="sk-cube2"></div>
+    </li>
+
+    <nvd3 options='options' data='data' ng-show="loaded" config="{refreshDataOnly: true}"></nvd3>
+
+    <pre ng-show="loaded">{{ sumByDay }}</pre>
+</div>

@@ -242,6 +242,18 @@ public class DataController {
         return dataList;
     }
 
+    /**
+     * Return data count
+     * @return
+     */
+    @RequestMapping(value = "/data/count", method = RequestMethod.GET)
+    public Response getDataCount() {
+        Response response = new Response();
+        response.setStatusCode(200);
+        response.setData(repository.count());
+        return response;
+    }
+
     @Autowired
     MongoTemplate mongoTemplate;
 
