@@ -41,7 +41,7 @@ app.controller('HomeCtrl', function ($rootScope, $scope, $http, toaster) {
             if (response.status == 200) {
                 if (response.data.statusCode == 200) {
                     info = response.data.data;
-                    toaster.pop('info', "Info", "<p> Status : " + info.status + "<br>Write count : " + info.writeCount + "</p>", 5000, 'trustedHtml');
+                    toaster.pop('info', "Info", "<p>" + response.data.message + "<br/> Status : " + info.status + "<br>Write count : " + info.writeCount + "</p>", 5000, 'trustedHtml');
                 } else {
                     toaster.pop('error', "Error", response.data.message);
                 }

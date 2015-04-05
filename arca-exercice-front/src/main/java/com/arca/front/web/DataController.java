@@ -18,6 +18,7 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.web.ErrorController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +31,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.batch.operations.NoSuchJobException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.LineNumberReader;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -42,6 +46,9 @@ public class DataController implements ErrorController {
     private final static Logger LOGGER = LoggerFactory.getLogger(DataController.class);
 
     private final static String HOME_PATH = "index";
+
+    @Value("${file.path}")
+    private String DATA_FILE;
 
     @Autowired
     JobLauncher jobLauncher;
@@ -99,6 +106,23 @@ public class DataController implements ErrorController {
         return "index";
     }
 
+    private static int totalLineNumber;
+
+    public int getNoOfLines() {
+        int lineNumber = -1;
+
+        try {
+            LineNumberReader reader = new LineNumberReader(new FileReader(DATA_FILE));
+            reader.skip(Integer.MAX_VALUE); //skips those many chars, if you feel your file size may exceed you can use Long.MAX_VALUE
+            return reader.getLineNumber();
+        } catch (IOException e) {
+            LOGGER.error("Error : {}", e);
+        }
+
+        LOGGER.info("Total line number : {}", totalLineNumber);
+        return lineNumber;
+    }
+
     /**
      * Run data import job within a Web Container
      *
@@ -106,6 +130,9 @@ public class DataController implements ErrorController {
      */
     @RequestMapping(value = "/job/start", method = RequestMethod.GET)
     public Response startJob() throws Exception {
+
+        totalLineNumber = getNoOfLines();
+        LOGGER.info("Total line number : {}", totalLineNumber);
 
         Response response = new Response();
 
@@ -142,13 +169,15 @@ public class DataController implements ErrorController {
     @MessageMapping("/percentage")
     @SendTo("/info/percentage")
     public String getPercentage() throws Exception {
-        Response response = getJobStatus();
-        Executions executions = (Executions) response.getData();
-        long current = Long.valueOf(executions.getWriteCount());
-        long totalItem = 100000;
+        if (totalLineNumber > 0) {
+            Response response = getJobStatus();
+            Executions executions = (Executions) response.getData();
+            long current = Long.valueOf(executions.getWriteCount());
+            float percentage = (float) ((current * 100) / totalLineNumber);
+            return String.valueOf(percentage);
+        }
 
-        float percentage = (float) ((current * 100) / totalItem);
-        return String.valueOf(percentage);
+        return "0";
     }
 
     @RequestMapping(value = "/job/stop", method = RequestMethod.GET)
@@ -204,7 +233,7 @@ public class DataController implements ErrorController {
                     Matcher m = p.matcher(result);
 
                     while (m.find()) {
-//                        LOGGER.info("{} : {}", m.group(1), m.group(2));
+                        //LOGGER.info("{} : {}", m.group(1), m.group(2));
 
                         if ("status".equals(m.group(1))) {
                             executions.setStatus(m.group(2));
@@ -220,8 +249,10 @@ public class DataController implements ErrorController {
                         }
                     }
 
+                    float percentage = (float) ((Integer.valueOf(executions.getWriteCount()) * 100) / totalLineNumber);
+
                     response.setStatusCode(200);
-                    response.setMessage("Info !");
+                    response.setMessage(percentage + "% done");
                     response.setData(executions);
                 }
             } else {
