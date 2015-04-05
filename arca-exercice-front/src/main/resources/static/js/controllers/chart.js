@@ -1,4 +1,4 @@
-app.controller('ChartCtrl', function ($rootScope, $scope, $http, $filter) {
+app.controller('ChartCtrl', function ($rootScope, $scope, $http, toaster) {
 
     $scope.loaded = false;
 
@@ -23,7 +23,7 @@ app.controller('ChartCtrl', function ($rootScope, $scope, $http, $filter) {
             useInteractiveGuideline: true,
             xAxis: {
                 axisLabel: 'Date',
-                tickFormat : function(d) {
+                tickFormat: function (d) {
                     return d3.time.format('%x')(new Date(d));
                 }
             },
@@ -45,9 +45,11 @@ app.controller('ChartCtrl', function ($rootScope, $scope, $http, $filter) {
         values: []
     }];
 
-     //Get days list
+    //Get days list
     $http.get('/sum/by/day').then(function (response) {
-        if (response.status == 200) {
+        $scope.loaded = true;
+
+        if (response.statusCode == 200) {
 
             var sumByDay = [];
 
@@ -56,12 +58,12 @@ app.controller('ChartCtrl', function ($rootScope, $scope, $http, $filter) {
             });
 
             $scope.sumByDay = sumByDay;
-            $scope.loaded = true;
 
             $scope.data[0].values = sumByDay;
 
         } else {
-            console.error(response);
+            console.error(response.data);
+            toaster.pop('error', "Error", "Something went wrong getting data.");
         }
     });
 });

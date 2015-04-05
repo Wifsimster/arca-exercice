@@ -1,12 +1,32 @@
-<h2 class="sub-header">All data</h2>
-
-<br/>
-
 <div ng-hide="dataCount > 0">
     <p class="well">No data found in database !</p>
 </div>
 
 <div ng-show="dataCount > 0">
+    <h2 class="sub-header">Distinct countries with sum values</h2>
+
+    <!-- Loading spinner -->
+    <li ng-hide="loaded" class="list-unstyled sk-spinner sk-spinner-wandering-cubes">
+        <div class="sk-cube1"></div>
+        <div class="sk-cube2"></div>
+    </li>
+
+    <table class="table table-striped" ng-show="loaded">
+        <thead>
+        <tr>
+            <th>Country</th>
+            <th>Sum</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="data in sumCountries">
+            <td>{{data.country}}</td>
+            <td>{{data.sum}}</td>
+        </tr>
+        </tbody>
+    </table>
+    <h2 class="sub-header">All data</h2>
+
     <div class="table-responsive" tasty-table bind-resource-callback="getResource" bind-init="init">
         <table class="table table-striped">
             <thead>
@@ -26,27 +46,4 @@
         </table>
         <div tasty-pagination></div>
     </div>
-
-    <h2 class="sub-header">Distinct countries with sum values</h2>
-
-    <!-- Loading spinner -->
-    <li ng-hide="loaded" class="list-unstyled sk-spinner sk-spinner-wandering-cubes">
-        <div class="sk-cube1"></div>
-        <div class="sk-cube2"></div>
-    </li>
-
-    <table class="table table-striped" ng-show="loaded">
-        <thead>
-            <tr>
-                <th>Country</th>
-                <th>Sum</th>
-            </tr>
-        </thead>
-        <tbody>
-        <tr ng-repeat="data in sumCountries">
-            <td>{{data.country}}</td>
-            <td>{{data.sum}}</td>
-        </tr>
-        </tbody>
-    </table>
 </div>

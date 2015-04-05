@@ -7,6 +7,7 @@ import com.arca.front.bean.Response;
 import com.arca.front.repository.DataRepository;
 import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBObject;
+import com.mongodb.CommandFailureException;
 import com.mongodb.DBObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,10 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.batch.operations.NoSuchJobException;
 import java.io.FileReader;
@@ -216,50 +214,60 @@ public class DataController implements ErrorController {
         Executions executions = new Executions();
 
         try {
-            Set<Long> runningExecutions = jobOperator.getRunningExecutions(importDataJob.getName());
+            if (jobOperator != null) {
+                Set<Long> runningExecutions = jobOperator.getRunningExecutions(importDataJob.getName());
 
-            if (runningExecutions != null && runningExecutions.size() > 0) {
-                Map<Long, String> jobInfo = jobOperator.getStepExecutionSummaries(execution.getJobId());
+                if (runningExecutions != null && runningExecutions.size() > 0) {
+                    Map<Long, String> jobInfo = jobOperator.getStepExecutionSummaries(execution.getJobId());
 
-                String result = null;
+                    String result = null;
 
-                for (String value : jobInfo.values()) {
-                    result = value;
-                }
-
-                // Parse executions info for HTTP response
-                if (result != null) {
-                    Pattern p = Pattern.compile("(\\w+)=\"*((?<=\")[^\"]+(?=\")|([^\\s]+))\"*");
-                    Matcher m = p.matcher(result);
-
-                    while (m.find()) {
-                        //LOGGER.info("{} : {}", m.group(1), m.group(2));
-
-                        if ("status".equals(m.group(1))) {
-                            executions.setStatus(m.group(2));
-                        }
-                        if ("exitStatus".equals(m.group(1))) {
-                            executions.setExitStatus(m.group(2));
-                        }
-                        if ("readCount".equals(m.group(1))) {
-                            executions.setReadCount(m.group(2));
-                        }
-                        if ("writeCount".equals(m.group(1))) {
-                            executions.setWriteCount(m.group(2));
-                        }
+                    for (String value : jobInfo.values()) {
+                        result = value;
                     }
 
-                    float percentage = (float) ((Integer.valueOf(executions.getWriteCount()) * 100) / totalLineNumber);
+                    // Parse executions info for HTTP response
+                    if (result != null) {
+                        Pattern p = Pattern.compile("(\\w+)=\"*((?<=\")[^\"]+(?=\")|([^\\s]+))\"*");
+                        Matcher m = p.matcher(result);
 
-                    response.setStatusCode(200);
-                    response.setMessage(percentage + "% done");
-                    response.setData(executions);
+                        while (m.find()) {
+                            //LOGGER.info("{} : {}", m.group(1), m.group(2));
+
+                            if ("status".equals(m.group(1))) {
+                                executions.setStatus(m.group(2));
+                            }
+                            if ("exitStatus".equals(m.group(1))) {
+                                executions.setExitStatus(m.group(2));
+                            }
+                            if ("readCount".equals(m.group(1))) {
+                                executions.setReadCount(m.group(2));
+                            }
+                            if ("writeCount".equals(m.group(1))) {
+                                executions.setWriteCount(m.group(2));
+                            }
+                        }
+
+                        float percentage = (float) ((Integer.valueOf(executions.getWriteCount()) * 100) / totalLineNumber);
+
+                        response.setStatusCode(200);
+                        response.setMessage(percentage + "% done");
+                        response.setData(executions);
+                    }
+                } else {
+                    String message = "No executions found !";
+                    LOGGER.info(message);
+                    response.setStatusCode(404);
+                    response.setMessage(message);
                 }
             } else {
-                LOGGER.info("No executions found !");
+                String message = "No job operator found !";
+                LOGGER.info(message);
+                response.setStatusCode(404);
+                response.setMessage(message);
             }
         } catch (NoSuchJobException | IndexOutOfBoundsException e) {
-            LOGGER.error("{}", e.getMessage());
+            LOGGER.error("Error : {}", e.getMessage());
             response.setStatusCode(400);
             response.setMessage("Something went wrong with job !");
             response.setData(e);
@@ -375,34 +383,50 @@ public class DataController implements ErrorController {
      * @return
      */
     @RequestMapping(value = "/sum/by/day", method = RequestMethod.GET)
-    public Map<String, String> getSumByDay() {
+    public Response getSumByDay() {
 
-        // Build the $projection operation
-        DBObject fields = new BasicDBObject("date", 1);
-        fields.put("value", 1);
-        fields.put("_id", 0);
-        DBObject project = new BasicDBObject("$project", fields);
+        Response response = new Response();
 
-        // Sum the value of each date
-        DBObject groupFields = new BasicDBObject("_id", "$date");
-        groupFields.put("sum", new BasicDBObject("$sum", "$value"));
-        DBObject group = new BasicDBObject("$group", groupFields);
+        try {
+            // Build the $projection operation
+            DBObject fields = new BasicDBObject("date", 1);
+            fields.put("value", 1);
+            fields.put("_id", 0);
+            DBObject project = new BasicDBObject("$project", fields);
 
-        // Sort by country
-        DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", -1));
+            // Sum the value of each date
+            DBObject groupFields = new BasicDBObject("_id", "$date");
+            groupFields.put("sum", new BasicDBObject("$sum", "$value"));
+            DBObject group = new BasicDBObject("$group", groupFields);
 
-        // Run aggregation
-        List<DBObject> pipeline = Arrays.asList(project, group, sort);
-        AggregationOutput output = mongoTemplate.getCollection("data").aggregate(pipeline);
+            // Sort by country
+            DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", -1));
 
-        Map<String, String> resultMap = new TreeMap<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            // Run aggregation
+            List<DBObject> pipeline = Arrays.asList(project, group, sort);
+            AggregationOutput output = mongoTemplate.getCollection("data").aggregate(pipeline);
 
-        for (DBObject result : output.results()) {
-            resultMap.put(sdf.format(result.get("_id")), String.valueOf(result.get("sum")));
+            Map<String, String> resultMap = new TreeMap<>();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+            for (DBObject result : output.results()) {
+                resultMap.put(sdf.format(result.get("_id")), String.valueOf(result.get("sum")));
+            }
+
+            response.setStatusCode(200);
+            response.setData(resultMap);
+
+        } catch (CommandFailureException e) {
+            response.setStatusCode(400);
+            response.setData(e);
         }
 
-        return resultMap;
+        return response;
+    }
+
+    @ExceptionHandler(Exception.class)
+    public void handleExceptions(Exception e) {
+        LOGGER.error("Error : {}", e);
     }
 
 }
