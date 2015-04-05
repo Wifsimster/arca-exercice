@@ -1,3 +1,57 @@
+<script type="text/javascript">
+    var stompClient = null;
+
+    function setConnected(connected) {
+        document.getElementById('connect').disabled = connected;
+        document.getElementById('disconnect').disabled = !connected;
+        document.getElementById('response').innerHTML = '';
+    }
+
+    function connect() {
+        var socket = new SockJS('/percentage');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            setConnected(true);
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/info/percentage', function (percentage) {
+                showPercentage(percentage.body);
+            });
+        });
+    }
+
+    function disconnect() {
+        if (stompClient != null) {
+            stompClient.disconnect();
+        }
+        setConnected(false);
+        console.log("Disconnected");
+    }
+
+    function sendName() {
+        stompClient.send("/app/percentage");
+    }
+
+    function showPercentage(message) {
+        console.log("showPercentage : " + message);
+
+        var response = document.getElementById('response');
+        var p = document.createElement('p');
+        p.style.wordWrap = 'break-word';
+        p.appendChild(document.createTextNode(message));
+        response.appendChild(p);
+
+    }
+</script>
+
+<div onload="disconnect()">
+    <button id="connect" onclick="connect();">Connect</button>
+    <button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>
+</div>
+<div id="conversationDiv">
+    <button id="sendName" onclick="sendName();">Send</button>
+    <p id="response"></p>
+</div>
+
 <h1 class="page-header">Dashboard</h1>
 
 <div>

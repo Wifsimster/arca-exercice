@@ -22,6 +22,8 @@ import org.springframework.boot.autoconfigure.web.ErrorController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -135,6 +137,13 @@ public class DataController implements ErrorController {
         }
 
         return response;
+    }
+
+    @MessageMapping("/percentage")
+    @SendTo("/info/percentage")
+    public String greeting() throws Exception {
+        Thread.sleep(3000); // simulated delay
+        return "Percentage !";
     }
 
     @RequestMapping(value = "/job/stop", method = RequestMethod.GET)
