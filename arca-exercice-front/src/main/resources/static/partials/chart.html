@@ -1,10 +1,8 @@
-<h2 class="sub-header">Values by day</h2>
-
-<br/>
-
 <div ng-hide="dataCount > 0">
     <p class="well">No data found in database !</p>
 </div>
+
+<h2 class="sub-header">Values by day</h2>
 
 <div ng-show="dataCount > 0">
     <!-- Loading spinner -->
@@ -13,7 +11,15 @@
         <div class="sk-cube2"></div>
     </li>
 
-    <nvd3 options='options' data='data' ng-show="loaded" config="{refreshDataOnly: true}"></nvd3>
+    <nvd3-line-chart
+            data="sumByDay"
+            showXAxis="true"
+            showYAxis="true"
+            tooltips="true"
+            xAxisTickFormat="xAxisTickFormat_Date_Format()"
+            interactive="true">
+        <svg></svg>
+    </nvd3-line-chart>
 
     <pre ng-show="loaded">{{ sumByDay }}</pre>
 </div>

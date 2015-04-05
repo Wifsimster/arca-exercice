@@ -6,11 +6,13 @@ app.controller('ChartCtrl', function ($rootScope, $scope, $http, toaster) {
     $scope.options = {
         chart: {
             type: 'lineChart',
+            autorefresh: true,
+            useInteractiveGuideline: true,
             height: 450,
             margin: {
                 top: 20,
                 right: 20,
-                bottom: 60,
+                bottom: 40,
                 left: 55
             },
             x: function (d) {
@@ -19,8 +21,6 @@ app.controller('ChartCtrl', function ($rootScope, $scope, $http, toaster) {
             y: function (d) {
                 return d.y;
             },
-            autorefresh: true,
-            useInteractiveGuideline: true,
             xAxis: {
                 axisLabel: 'Date',
                 tickFormat: function (d) {
@@ -29,9 +29,6 @@ app.controller('ChartCtrl', function ($rootScope, $scope, $http, toaster) {
             },
             yAxis: {
                 axisLabel: 'Value'
-            },
-            callback: function (chart) {
-                console.log("!!! lineChart callback !!!");
             }
         },
         title: {
@@ -45,24 +42,43 @@ app.controller('ChartCtrl', function ($rootScope, $scope, $http, toaster) {
         values: []
     }];
 
+
+    $scope.xAxisTickFormat_Date_Format = function(){
+        return function(d){
+            console.log(d);
+            console.log(d3.time.format('%x')(new Date(d)));
+            return d3.time.format('%x')(new Date(d));
+        }
+    };
+
     //Get days list
     $http.get('/sum/by/day').then(function (response) {
         $scope.loaded = true;
 
-        if (response.statusCode == 200) {
+        console.log(response);
 
-            var sumByDay = [];
+        if (response.status == 200) {
 
-            $.map(response.data, function (value, index) {
-                sumByDay.push({x: index, y: value});
+            var data = [];
+            var sumByDay = {};
+            sumByDay.key = "Data";
+            sumByDay.values = [];
+
+            $.map(response.data.data, function (value, index) {
+                sumByDay.values.push([index, parseInt(value)]);
             });
 
-            $scope.sumByDay = sumByDay;
+            data.push(sumByDay);
 
-            $scope.data[0].values = sumByDay;
+            $scope.sumByDay = data;
+
+            // Refresh chart
+            //$scope.api.refresh();
+
+            // Show chart
+            //$scope.options.chart.visible = true;
 
         } else {
-            console.error(response.data);
             toaster.pop('error', "Error", "Something went wrong getting data.");
         }
     });

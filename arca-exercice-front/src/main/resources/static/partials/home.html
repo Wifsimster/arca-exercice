@@ -41,17 +41,21 @@
     // Display percentage value on DOM
     function showPercentage(message) {
         var response = document.getElementById('response');
-        response.innerHTML = '';
-        response.appendChild(document.createTextNode(message));
 
-        var progressBar = document.getElementsByClassName('progress-bar')[0];
-        progressBar.setAttribute("aria-valuenow", message);
-        progressBar.style.width = message + "%";
+        if (response) {
+            response.innerHTML = '';
+            response.appendChild(document.createTextNode(message));
+
+            var progressBar = document.getElementsByClassName('progress-bar')[0];
+            progressBar.setAttribute("aria-valuenow", message);
+            progressBar.style.width = message + "%";
+        }
     }
 
     // Connect socket after loading DOM
     $(document).ready(function () {
-        start();
+        //start();
+
     })
 </script>
 
@@ -75,16 +79,11 @@
     <div class="sk-cube2"></div>
 </li>
 
+
 <div class="progress" ng-show="execution">
     <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0"
          aria-valuemax="100"
-         style="min-width: 2em; width: 0%;">
+         style="min-width: 3em; width: 0%;">
         <span id="response"></span>%
     </div>
-</div>
-
-<br/><br/>
-
-<div ng-hide="dataCount > 0">
-    <p class="well">No data found in database !</p>
 </div>

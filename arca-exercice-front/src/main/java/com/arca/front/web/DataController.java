@@ -20,7 +20,6 @@ import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.web.ErrorController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -32,18 +31,18 @@ import javax.batch.operations.NoSuchJobException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @RestController
-public class DataController implements ErrorController {
+public class DataController {
 
     // Slf4j logger
     private final static Logger LOGGER = LoggerFactory.getLogger(DataController.class);
-
-    private final static String HOME_PATH = "index";
 
     @Value("${file.path}")
     private String DATA_FILE;
@@ -66,6 +65,14 @@ public class DataController implements ErrorController {
     @Autowired
     private DataRepository repository;
 
+    @Autowired
+    @Qualifier("asyncJobLauncher")
+    private JobLauncher asyncJobLauncher;
+
+    private JobExecution execution;
+
+    private static int totalLineNumber;
+
     /**
      * Build job parameters
      *
@@ -78,34 +85,11 @@ public class DataController implements ErrorController {
         return p;
     }
 
-    @Autowired
-    @Qualifier("asyncJobLauncher")
-    private JobLauncher asyncJobLauncher;
-
-    private JobExecution execution;
-
     /**
-     * Rest service for Junit
+     * Return the total number of lines in the data file
      *
      * @return
-     * @throws Exception
      */
-    @RequestMapping(value = "/test", method = RequestMethod.GET)
-    public Response testRest() throws Exception {
-        Response response = new Response();
-        response.setStatusCode(200);
-        response.setMessage("test");
-        response.setData(null);
-        return response;
-    }
-
-    @Override
-    public String getErrorPath() {
-        return "index";
-    }
-
-    private static int totalLineNumber;
-
     public int getNoOfLines() {
         int lineNumber = -1;
 
@@ -214,7 +198,7 @@ public class DataController implements ErrorController {
         Executions executions = new Executions();
 
         try {
-            if (jobOperator != null) {
+            if (jobOperator != null && importDataJob != null) {
                 Set<Long> runningExecutions = jobOperator.getRunningExecutions(importDataJob.getName());
 
                 if (runningExecutions != null && runningExecutions.size() > 0) {
@@ -267,7 +251,7 @@ public class DataController implements ErrorController {
                 response.setMessage(message);
             }
         } catch (NoSuchJobException | IndexOutOfBoundsException e) {
-            LOGGER.error("Error : {}", e.getMessage());
+            //LOGGER.error("Error : {}", e.getMessage());
             response.setStatusCode(400);
             response.setMessage("Something went wrong with job !");
             response.setData(e);
@@ -385,6 +369,8 @@ public class DataController implements ErrorController {
     @RequestMapping(value = "/sum/by/day", method = RequestMethod.GET)
     public Response getSumByDay() {
 
+        LOGGER.info("Request sum by day");
+
         Response response = new Response();
 
         try {
@@ -402,16 +388,30 @@ public class DataController implements ErrorController {
             // Sort by country
             DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", -1));
 
+            DBObject skip = new BasicDBObject("$skip", 0);
+            DBObject limit = new BasicDBObject("$limit", 10000000);
+
             // Run aggregation
-            List<DBObject> pipeline = Arrays.asList(project, group, sort);
+            List<DBObject> pipeline = Arrays.asList(project, group, sort, skip, limit);
             AggregationOutput output = mongoTemplate.getCollection("data").aggregate(pipeline);
 
             Map<String, String> resultMap = new TreeMap<>();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
             for (DBObject result : output.results()) {
-                resultMap.put(sdf.format(result.get("_id")), String.valueOf(result.get("sum")));
+                //resultMap.put(sdf.format(result.get("_id")), String.valueOf(result.get("sum")));
+                //date = (Date)formatter.parse(str_date);
+                try {
+                    Date date = sdf.parse(sdf.format(result.get("_id")));
+                    Timestamp timeStampDate = new Timestamp(date.getTime());
+                    long req = timeStampDate.getTime();
+                    resultMap.put(String.valueOf(req), String.valueOf(result.get("sum")));
+                } catch (ParseException e) {
+                    LOGGER.error("Error : {}", e);
+                }
             }
+
+            LOGGER.info("Result map size : {}", resultMap.size());
 
             response.setStatusCode(200);
             response.setData(resultMap);
@@ -424,9 +424,10 @@ public class DataController implements ErrorController {
         return response;
     }
 
+    // Handle all dispatcher exception
     @ExceptionHandler(Exception.class)
     public void handleExceptions(Exception e) {
-        LOGGER.error("Error : {}", e);
+        LOGGER.error("Error : {}", e.getClass());
     }
 
 }
