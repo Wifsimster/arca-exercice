@@ -2,10 +2,12 @@ app.controller('HomeCtrl', function ($rootScope, $scope, $http, toaster) {
 
     // Batch state
     $rootScope.execution = false;
+    $scope.loading = false;
 
     $scope.start = function () {
+        $scope.loading = true;
         $http.get('/job/start').then(function (response) {
-            console.log(response);
+            $scope.loading = false;
             if (response.status == 200) {
                 if (response.data.statusCode == 200) {
                     toaster.pop('success', "Success", response.data.message);
@@ -51,4 +53,23 @@ app.controller('HomeCtrl', function ($rootScope, $scope, $http, toaster) {
             }
         });
     };
+
+    // Check if job is already started
+    $http.get('/job/status').then(function (response) {
+        console.log(response);
+        if (response.status == 200) {
+            if (response.data.statusCode == 200) {
+                info = response.data.data;
+                if (info.status == "STARTED,") {
+                    console.log("Job is already started !");
+                    $rootScope.execution = true;
+                }
+            } else {
+                toaster.pop('error', "Error", response.data.message);
+            }
+        } else {
+            console.error(response);
+            toaster.pop('error', "Error", response.status);
+        }
+    });
 });
