@@ -141,9 +141,14 @@ public class DataController implements ErrorController {
 
     @MessageMapping("/percentage")
     @SendTo("/info/percentage")
-    public String greeting() throws Exception {
-        Thread.sleep(3000); // simulated delay
-        return "Percentage !";
+    public String getPercentage() throws Exception {
+        Response response = getJobStatus();
+        Executions executions = (Executions) response.getData();
+        long current = Long.valueOf(executions.getWriteCount());
+        long totalItem = 100000;
+
+        float percentage = (float) ((current * 100) / totalItem);
+        return String.valueOf(percentage);
     }
 
     @RequestMapping(value = "/job/stop", method = RequestMethod.GET)
@@ -192,8 +197,6 @@ public class DataController implements ErrorController {
                 for (String value : jobInfo.values()) {
                     result = value;
                 }
-
-                LOGGER.info("Result : {}", result);
 
                 // Parse executions info for HTTP response
                 if (result != null) {
