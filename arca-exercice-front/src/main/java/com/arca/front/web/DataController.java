@@ -101,11 +101,11 @@ public class DataController {
      *
      * @return
      */
-    public int getNoOfLines() {
+    public int getNoOfLines(String path) {
         int lineNumber = -1;
 
         try {
-            LineNumberReader reader = new LineNumberReader(new FileReader(DATA_FILE));
+            LineNumberReader reader = new LineNumberReader(new FileReader(path));
 
             // Skips those many chars, if you feel your file size may exceed you can use Long.MAX_VALUE
             reader.skip(Integer.MAX_VALUE);
@@ -119,6 +119,30 @@ public class DataController {
         return lineNumber;
     }
 
+    @MessageMapping("/percentage")
+    @SendTo("/info/percentage")
+    public String getPercentage() throws Exception {
+
+        if (totalLineNumber > 0) {
+            Response response = getJobStatus();
+            Executions executions = (Executions) response.getData();
+            float current = Float.valueOf(executions.getWriteCount());
+
+            if (current > 0) {
+                float percentage = ((current * 100) / totalLineNumber);
+                LOGGER.debug("Percentage : {}%", percentage);
+                DecimalFormat df = new DecimalFormat("#.##");
+                return String.valueOf(df.format(percentage));
+            } else {
+                LOGGER.warn("Cannot get current process line !");
+                return "-1";
+            }
+        } else {
+            LOGGER.warn("totalLineNumber is not initialized yet !");
+            return "-1";
+        }
+    }
+
     /**
      * Run data import job within a Web Container
      *
@@ -127,7 +151,7 @@ public class DataController {
     @RequestMapping(value = "/job/start", method = RequestMethod.GET)
     public Response startJob() throws Exception {
 
-        totalLineNumber = getNoOfLines();
+        totalLineNumber = getNoOfLines(DATA_FILE);
         LOGGER.info("Total line number : {}", totalLineNumber);
 
         Response response = new Response();
@@ -155,30 +179,6 @@ public class DataController {
         }
 
         return response;
-    }
-
-    @MessageMapping("/percentage")
-    @SendTo("/info/percentage")
-    public String getPercentage() throws Exception {
-
-        if (totalLineNumber > 0) {
-            Response response = getJobStatus();
-            Executions executions = (Executions) response.getData();
-            float current = Float.valueOf(executions.getWriteCount());
-
-            if (current > 0) {
-                float percentage = ((current * 100) / totalLineNumber);
-                LOGGER.debug("Percentage : {}%", percentage);
-                DecimalFormat df = new DecimalFormat("#.##");
-                return String.valueOf(df.format(percentage));
-            } else {
-                LOGGER.warn("Cannot get current process line !");
-                return "-1";
-            }
-        } else {
-            LOGGER.warn("totalLineNumber is not initialized yet !");
-            return "-1";
-        }
     }
 
     @RequestMapping(value = "/job/stop", method = RequestMethod.GET)

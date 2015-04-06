@@ -6,6 +6,9 @@ spring:
       enabled : false
 server:
     port: 8080
+logging:
+  level:
+    com.arca: DEBUG
 
 db:
   name: arca
