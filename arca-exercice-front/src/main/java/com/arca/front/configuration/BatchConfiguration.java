@@ -98,7 +98,6 @@ public class BatchConfiguration {
     // end::readerwriterprocessor[]
 
     // tag::jobstep[]
-
     /**
      * Initialize MongoClient instance with conf
      *
@@ -107,7 +106,7 @@ public class BatchConfiguration {
      */
     @Bean
     public MongoDbFactory mongoDbFactory() throws Exception {
-        //LOGGER.info("MongoDB({}:{})", ADDRESS, PORT);
+        LOGGER.info("MongoDB({}:{})", ADDRESS, PORT);
         MongoClient client = new MongoClient(ADDRESS, PORT);
         return new SimpleMongoDbFactory(client, DB_NAME);
     }

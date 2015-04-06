@@ -1,7 +1,6 @@
 package com.arca.front;
 
 import com.arca.front.repository.DataRepository;
-import com.arca.front.web.DataController;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -64,19 +63,19 @@ public class AppTest {
     /**
      * Test total number of lines in a file
      */
-    @Test
-    public void testNoLines() {
-        DataController dataController = new DataController();
-        long noLines = dataController.getNoOfLines(DATA_FILE);
-        assertTrue(noLines > 0);
-    }
+//    @Test
+//    public void testNoLines() {
+//        DataController dataController = new DataController();
+//        long noLines = dataController.getNoOfLines(DATA_FILE);
+//        assertTrue(noLines > 0);
+//    }
 
-    @Test
-    public void testNoLinesFalse() {
-        DataController dataController = new DataController();
-        long noLines = dataController.getNoOfLines("");
-        assertTrue(noLines == -1);
-    }
+//    @Test
+//    public void testNoLinesFalse() {
+//        DataController dataController = new DataController();
+//        long noLines = dataController.getNoOfLines("");
+//        assertTrue(noLines == -1);
+//    }
 
     /**
      * Test get percentage
@@ -142,15 +141,5 @@ public class AppTest {
     public void downUp() {
         this.mockMvc = null;
     }
-
-    // fyi : http://docs.spring.io/spring-batch/trunk/reference/html/testing.html
-
-    // Test start job
-
-    // Test stop job
-
-    // Test getting job info
-
-    // Test job resume with data coherence
 
 }

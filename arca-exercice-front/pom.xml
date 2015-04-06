@@ -60,6 +60,10 @@
             <version>${hamcrest.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-test</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
