@@ -67,7 +67,7 @@ public class AppTest {
     @Test
     public void testNoLines() {
         DataController dataController = new DataController();
-        long noLines = dataController.getNoOfLines(DATA_FILE);
+        long noLines = dataController.getNoOfLines(System.getProperty("user.dir") + DATA_FILE);
         assertTrue(noLines > 0);
     }
 

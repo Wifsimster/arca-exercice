@@ -16,4 +16,5 @@ db:
   port: 27017
 
 file:
-  path: "D:\\data.txt"
+  #C:\Users\Wifsimster\mercurial\arca-exercice\arca-exercice-front
+  path: "\\src\\test\\resources\\date_test.txt"

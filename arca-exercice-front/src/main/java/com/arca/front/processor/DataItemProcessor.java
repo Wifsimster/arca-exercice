@@ -24,7 +24,7 @@ public class DataItemProcessor implements ItemProcessor<DataTxt, Data> {
         data.setCountry(dataTxt.getCountry());
         data.setValue(dataTxt.getValue());
 
-        //LOGGER.info("Process() : {}", data.toString());
+        //LOGGER.debug("Process() : {}", data.toString());
 
         return data;
     }
