@@ -9,8 +9,8 @@ server:
 
 db:
   name: arca
-  address: localhost
+  address: 192.168.0.21
   port: 27017
 
 file:
-  path: "C:\\data.txt"
+  path: "D:\\data.txt"

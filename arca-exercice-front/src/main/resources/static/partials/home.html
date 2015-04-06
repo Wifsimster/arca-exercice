@@ -54,15 +54,15 @@
 
     // Connect socket after loading DOM
     $(document).ready(function () {
-        //start();
-
+        // Comment this line to stop progress bar to being refreshed
+        start();
     })
 </script>
 
 <h1 class="page-header">Dashboard</h1>
 
 <div>
-    <button type="submit" ng-show="!execution" class="btn btn-lg btn-primary" ng-click="start()">
+    <button type="submit" ng-show="(!execution && !loading)" class="btn btn-lg btn-primary" ng-click="start()">
         Launch batch
     </button>
     <button type="submit" ng-show="execution" class="btn btn-lg btn-danger" onclick="disconnect();" ng-click="stop()">

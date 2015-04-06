@@ -32,6 +32,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.sql.Timestamp;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -66,12 +67,15 @@ public class DataController {
     private DataRepository repository;
 
     @Autowired
+    MongoTemplate mongoTemplate;
+
+    @Autowired
     @Qualifier("asyncJobLauncher")
     private JobLauncher asyncJobLauncher;
 
     private JobExecution execution;
 
-    private static int totalLineNumber;
+    private static float totalLineNumber;
 
     /**
      * Build job parameters
@@ -95,10 +99,13 @@ public class DataController {
 
         try {
             LineNumberReader reader = new LineNumberReader(new FileReader(DATA_FILE));
-            reader.skip(Integer.MAX_VALUE); //skips those many chars, if you feel your file size may exceed you can use Long.MAX_VALUE
+
+            // Skips those many chars, if you feel your file size may exceed you can use Long.MAX_VALUE
+            reader.skip(Integer.MAX_VALUE);
+
             return reader.getLineNumber();
         } catch (IOException e) {
-            LOGGER.error("Error : {}", e);
+            LOGGER.error("IOException : {}", e);
         }
 
         LOGGER.info("Total line number : {}", totalLineNumber);
@@ -129,17 +136,12 @@ public class DataController {
 
             LOGGER.info("Status : {}", status.getExitCode());
 
-//            if (ExitStatus.COMPLETED.getExitCode().equals(status.getExitCode())) {
-            // Response object
             response.setStatusCode(200);
             response.setMessage("Job started !");
             response.setData(execution);
-//            } else {
-//                response.setStatusCode(400);
-//                response.setMessage("Something went wrong with job !");
-//            }
         } catch (NoSuchJobException | DuplicateJobException | IllegalStateException e) {
-            LOGGER.error("Error : {}", e);
+            LOGGER.error("Catching error : {}", e);
+            LOGGER.error("Return error response to client !");
             response.setStatusCode(400);
             response.setMessage("Something went wrong with job !");
             response.setData(e);
@@ -151,15 +153,28 @@ public class DataController {
     @MessageMapping("/percentage")
     @SendTo("/info/percentage")
     public String getPercentage() throws Exception {
+
         if (totalLineNumber > 0) {
             Response response = getJobStatus();
             Executions executions = (Executions) response.getData();
-            long current = Long.valueOf(executions.getWriteCount());
-            float percentage = (float) ((current * 100) / totalLineNumber);
-            return String.valueOf(percentage);
-        }
+            float current = Float.valueOf(executions.getWriteCount());
 
-        return "0";
+            if (current > 0) {
+                LOGGER.debug("Current process line : {}", current);
+                LOGGER.debug("Total line : {}", totalLineNumber);
+                float percentage = ((current * 100) / totalLineNumber);
+                NumberFormat numberFormat = NumberFormat.getNumberInstance();
+                numberFormat.setMinimumFractionDigits(2);
+
+                return String.valueOf(numberFormat.format(percentage));
+            } else {
+                LOGGER.warn("Cannot get current process line !");
+                return "-1";
+            }
+        } else {
+            LOGGER.warn("totalLineNumber is not initialized yet !");
+            return "-1";
+        }
     }
 
     @RequestMapping(value = "/job/stop", method = RequestMethod.GET)
@@ -176,11 +191,13 @@ public class DataController {
             response.setStatusCode(200);
             response.setMessage("Job stopped !");
         } catch (NoSuchJobException e) {
-            LOGGER.error("{}", e);
+            LOGGER.error("NoSuchJobException : {}", e);
+            LOGGER.error("Return error response to client !");
             response.setStatusCode(400);
             response.setMessage("Something went wrong with job !");
             response.setData(e);
         }
+
         return response;
     }
 
@@ -232,26 +249,31 @@ public class DataController {
                             }
                         }
 
-                        float percentage = (float) ((Integer.valueOf(executions.getWriteCount()) * 100) / totalLineNumber);
+                        float percentage = ((Float.valueOf(executions.getWriteCount()) * 100) / totalLineNumber);
+                        NumberFormat numberFormat = NumberFormat.getNumberInstance();
+                        numberFormat.setMinimumFractionDigits(2);
 
                         response.setStatusCode(200);
-                        response.setMessage(percentage + "% done");
+                        response.setMessage(numberFormat.format(percentage) + "% done");
                         response.setData(executions);
                     }
                 } else {
                     String message = "No executions found !";
-                    LOGGER.info(message);
+                    LOGGER.error(message);
+                    LOGGER.error("Return error response to client !");
                     response.setStatusCode(404);
                     response.setMessage(message);
                 }
             } else {
                 String message = "No job operator found !";
-                LOGGER.info(message);
+                LOGGER.error(message);
+                LOGGER.error("Return error response to client !");
                 response.setStatusCode(404);
                 response.setMessage(message);
             }
         } catch (NoSuchJobException | IndexOutOfBoundsException e) {
-            //LOGGER.error("Error : {}", e.getMessage());
+            LOGGER.error("Catching error : {}", e);
+            LOGGER.error("Return error response to client !");
             response.setStatusCode(400);
             response.setMessage("Something went wrong with job !");
             response.setData(e);
@@ -269,19 +291,22 @@ public class DataController {
      */
     @RequestMapping(value = "/data?page={page}&count={count}", method = RequestMethod.GET)
     public DataList getData(@PathVariable int page, @PathVariable int count) {
-
         DataList dataList = new DataList();
-        Page<Data> dataPaginate = repository.findAll(new PageRequest(page, count));
 
-        // Build response object
-        dataList.setCount(dataPaginate.getSize());
-        dataList.setPage(page);
-        dataList.setPages((int) (dataPaginate.getTotalElements() / dataPaginate.getSize()));
-        dataList.setSize((int) dataPaginate.getTotalElements());
-        dataList.setDataEntities(dataPaginate.getContent());
-        dataList.setSortBy("timestamp");
-        dataList.setSortOrder("asc");
+        if (repository != null) {
+            Page<Data> dataPaginate = repository.findAll(new PageRequest(page, count));
 
+            // Build response object
+            dataList.setCount(dataPaginate.getSize());
+            dataList.setPage(page);
+            dataList.setPages((int) (dataPaginate.getTotalElements() / dataPaginate.getSize()));
+            dataList.setSize((int) dataPaginate.getTotalElements());
+            dataList.setDataEntities(dataPaginate.getContent());
+            dataList.setSortBy("timestamp");
+            dataList.setSortOrder("asc");
+        } else {
+            LOGGER.warn("No repository found !");
+        }
         return dataList;
     }
 
@@ -293,13 +318,16 @@ public class DataController {
     @RequestMapping(value = "/data/count", method = RequestMethod.GET)
     public Response getDataCount() {
         Response response = new Response();
-        response.setStatusCode(200);
-        response.setData(repository.count());
+
+        if (repository != null) {
+            response.setStatusCode(200);
+            response.setData(repository.count());
+        } else {
+            LOGGER.warn("No repository found !");
+        }
+
         return response;
     }
-
-    @Autowired
-    MongoTemplate mongoTemplate;
 
     /**
      * Get countries list with pagination
@@ -312,16 +340,21 @@ public class DataController {
     public DataList getDistinctCountry(@PathVariable int page, @PathVariable int count) {
 
         DataList dataList = new DataList();
-        List<Data> data = mongoTemplate.getCollection("data").distinct("country");
 
-        // Build response object
-        dataList.setCount(count);
-        dataList.setPage(page);
-        dataList.setPages(count / data.size());
-        dataList.setSize(data.size());
-        dataList.setDataEntities(data);
-        dataList.setSortBy("timestamp");
-        dataList.setSortOrder("asc");
+        if (mongoTemplate != null) {
+            List<Data> data = mongoTemplate.getCollection("data").distinct("country");
+
+            // Build response object
+            dataList.setCount(count);
+            dataList.setPage(page);
+            dataList.setPages(count / data.size());
+            dataList.setSize(data.size());
+            dataList.setDataEntities(data);
+            dataList.setSortBy("timestamp");
+            dataList.setSortOrder("asc");
+        } else {
+            LOGGER.warn("No mongoTemplate found !");
+        }
 
         return dataList;
     }
@@ -334,28 +367,32 @@ public class DataController {
     @RequestMapping(value = "/sum/by/country", method = RequestMethod.GET)
     public Map<String, String> getValueSumByDistinctCountry() {
 
-        // Build the $projection operation
-        DBObject fields = new BasicDBObject("country", 1);
-        fields.put("value", 1);
-        fields.put("_id", 0);
-        DBObject project = new BasicDBObject("$project", fields);
-
-        // Sum the value of each country
-        DBObject groupFields = new BasicDBObject("_id", "$country");
-        groupFields.put("sum", new BasicDBObject("$sum", "$value"));
-        DBObject group = new BasicDBObject("$group", groupFields);
-
-        // Sort by country
-        DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", 1));
-
-        // Run aggregation
-        List<DBObject> pipeline = Arrays.asList(project, group, sort);
-        AggregationOutput output = mongoTemplate.getCollection("data").aggregate(pipeline);
-
         Map<String, String> resultMap = new HashMap<>();
 
-        for (DBObject result : output.results()) {
-            resultMap.put(String.valueOf(result.get("_id")), String.valueOf(result.get("sum")));
+        if (mongoTemplate != null) {
+            // Build the $projection operation
+            DBObject fields = new BasicDBObject("country", 1);
+            fields.put("value", 1);
+            fields.put("_id", 0);
+            DBObject project = new BasicDBObject("$project", fields);
+
+            // Sum the value of each country
+            DBObject groupFields = new BasicDBObject("_id", "$country");
+            groupFields.put("sum", new BasicDBObject("$sum", "$value"));
+            DBObject group = new BasicDBObject("$group", groupFields);
+
+            // Sort by country
+            DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", 1));
+
+            // Run aggregation
+            List<DBObject> pipeline = Arrays.asList(project, group, sort);
+            AggregationOutput output = mongoTemplate.getCollection("data").aggregate(pipeline);
+
+            for (DBObject result : output.results()) {
+                resultMap.put(String.valueOf(result.get("_id")), String.valueOf(result.get("sum")));
+            }
+        } else {
+            LOGGER.warn("No mongoTemplate found !");
         }
 
         return resultMap;
@@ -369,56 +406,59 @@ public class DataController {
     @RequestMapping(value = "/sum/by/day", method = RequestMethod.GET)
     public Response getSumByDay() {
 
-        LOGGER.info("Request sum by day");
-
         Response response = new Response();
 
-        try {
-            // Build the $projection operation
-            DBObject fields = new BasicDBObject("date", 1);
-            fields.put("value", 1);
-            fields.put("_id", 0);
-            DBObject project = new BasicDBObject("$project", fields);
+        if (mongoTemplate != null) {
 
-            // Sum the value of each date
-            DBObject groupFields = new BasicDBObject("_id", "$date");
-            groupFields.put("sum", new BasicDBObject("$sum", "$value"));
-            DBObject group = new BasicDBObject("$group", groupFields);
+            try {
+                // Build the $projection operation
+                DBObject fields = new BasicDBObject("date", 1);
+                fields.put("value", 1);
+                fields.put("_id", 0);
+                DBObject project = new BasicDBObject("$project", fields);
 
-            // Sort by country
-            DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", -1));
+                // Sum the value of each date
+                DBObject groupFields = new BasicDBObject("_id", "$date");
+                groupFields.put("sum", new BasicDBObject("$sum", "$value"));
+                DBObject group = new BasicDBObject("$group", groupFields);
 
-            DBObject skip = new BasicDBObject("$skip", 0);
-            DBObject limit = new BasicDBObject("$limit", 10000000);
+                // Sort by country
+                DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", -1));
 
-            // Run aggregation
-            List<DBObject> pipeline = Arrays.asList(project, group, sort, skip, limit);
-            AggregationOutput output = mongoTemplate.getCollection("data").aggregate(pipeline);
+                DBObject skip = new BasicDBObject("$skip", 0);
+                DBObject limit = new BasicDBObject("$limit", 10000000);
 
-            Map<String, String> resultMap = new TreeMap<>();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                // Run aggregation
+                List<DBObject> pipeline = Arrays.asList(project, group, sort, skip, limit);
+                AggregationOutput output = mongoTemplate.getCollection("data").aggregate(pipeline);
 
-            for (DBObject result : output.results()) {
-                //resultMap.put(sdf.format(result.get("_id")), String.valueOf(result.get("sum")));
-                //date = (Date)formatter.parse(str_date);
-                try {
-                    Date date = sdf.parse(sdf.format(result.get("_id")));
-                    Timestamp timeStampDate = new Timestamp(date.getTime());
-                    long req = timeStampDate.getTime();
-                    resultMap.put(String.valueOf(req), String.valueOf(result.get("sum")));
-                } catch (ParseException e) {
-                    LOGGER.error("Error : {}", e);
+                Map<String, String> resultMap = new TreeMap<>();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+                for (DBObject result : output.results()) {
+                    //resultMap.put(sdf.format(result.get("_id")), String.valueOf(result.get("sum")));
+                    //date = (Date)formatter.parse(str_date);
+                    try {
+                        Date date = sdf.parse(sdf.format(result.get("_id")));
+                        Timestamp timeStampDate = new Timestamp(date.getTime());
+                        long req = timeStampDate.getTime();
+                        resultMap.put(String.valueOf(req), String.valueOf(result.get("sum")));
+                    } catch (ParseException e) {
+                        LOGGER.error("Error : {}", e);
+                    }
                 }
+
+                LOGGER.info("Result map size : {}", resultMap.size());
+
+                response.setStatusCode(200);
+                response.setData(resultMap);
+
+            } catch (CommandFailureException e) {
+                response.setStatusCode(400);
+                response.setData(e);
             }
-
-            LOGGER.info("Result map size : {}", resultMap.size());
-
-            response.setStatusCode(200);
-            response.setData(resultMap);
-
-        } catch (CommandFailureException e) {
-            response.setStatusCode(400);
-            response.setData(e);
+        } else {
+            LOGGER.warn("No mongoTemplate found !");
         }
 
         return response;
@@ -427,7 +467,7 @@ public class DataController {
     // Handle all dispatcher exception
     @ExceptionHandler(Exception.class)
     public void handleExceptions(Exception e) {
-        LOGGER.error("Error : {}", e.getClass());
+        LOGGER.error("Handle exceptions : {}", e.getClass());
     }
 
 }

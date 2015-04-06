@@ -20,7 +20,7 @@ app.config(['$routeProvider', '$locationProvider',
         $locationProvider.html5Mode({enabled: true, requireBase: false});
     }]);
 
-app.controller('AppCtrl', function ($rootScope, $scope, $http) {
+app.controller('AppCtrl', function ($rootScope, $scope, $http, toaster) {
 
     $scope.url = "";
 
@@ -29,10 +29,15 @@ app.controller('AppCtrl', function ($rootScope, $scope, $http) {
     // Get data count
     $http.get('/data/count').then(function (response) {
         console.log(response);
-        if (response.status == 200) {
-            $rootScope.dataCount = response.data.data;
+        if (response.status == 200 && response.data != null) {
+            if (response.data.statusCode == 200) {
+                $rootScope.dataCount = response.data.data;
+            }
+            if (response.data.statusCode == 400) {
+                toaster.pop('error', "Error", response.data.message);
+            }
         } else {
-            console.error(response);
+            toaster.pop('error', "Error", response.status);
         }
     });
 
