@@ -32,6 +32,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -76,6 +77,12 @@ public class DataController {
     private JobExecution execution;
 
     private static float totalLineNumber;
+
+    // Handle all dispatcher exception
+    @ExceptionHandler(Exception.class)
+    public void handleExceptions(Exception e) {
+        LOGGER.error("Handle exceptions : {}", e.getClass());
+    }
 
     /**
      * Build job parameters
@@ -160,13 +167,10 @@ public class DataController {
             float current = Float.valueOf(executions.getWriteCount());
 
             if (current > 0) {
-                LOGGER.debug("Current process line : {}", current);
-                LOGGER.debug("Total line : {}", totalLineNumber);
                 float percentage = ((current * 100) / totalLineNumber);
-                NumberFormat numberFormat = NumberFormat.getNumberInstance();
-                numberFormat.setMinimumFractionDigits(2);
-
-                return String.valueOf(numberFormat.format(percentage));
+                LOGGER.debug("Percentage : {}%", percentage);
+                DecimalFormat df = new DecimalFormat("#.##");
+                return String.valueOf(df.format(percentage));
             } else {
                 LOGGER.warn("Cannot get current process line !");
                 return "-1";
@@ -422,14 +426,15 @@ public class DataController {
                 groupFields.put("sum", new BasicDBObject("$sum", "$value"));
                 DBObject group = new BasicDBObject("$group", groupFields);
 
+                // Skip and limit
+                DBObject skip = new BasicDBObject("$skip", 0);
+                DBObject limit = new BasicDBObject("$limit", 250000);
+
                 // Sort by country
                 DBObject sort = new BasicDBObject("$sort", new BasicDBObject("_id", -1));
 
-                DBObject skip = new BasicDBObject("$skip", 0);
-                DBObject limit = new BasicDBObject("$limit", 10000000);
-
                 // Run aggregation
-                List<DBObject> pipeline = Arrays.asList(project, group, sort, skip, limit);
+                List<DBObject> pipeline = Arrays.asList(project, group, skip, limit, sort);
                 AggregationOutput output = mongoTemplate.getCollection("data").aggregate(pipeline);
 
                 Map<String, String> resultMap = new TreeMap<>();
@@ -444,30 +449,28 @@ public class DataController {
                         long req = timeStampDate.getTime();
                         resultMap.put(String.valueOf(req), String.valueOf(result.get("sum")));
                     } catch (ParseException e) {
-                        LOGGER.error("Error : {}", e);
+                        LOGGER.error("ParseException : {}", e);
                     }
                 }
 
-                LOGGER.info("Result map size : {}", resultMap.size());
-
+                LOGGER.debug("Result map size : {}", resultMap.size());
                 response.setStatusCode(200);
                 response.setData(resultMap);
 
             } catch (CommandFailureException e) {
+                LOGGER.error("CommandFailureException : {}", e);
                 response.setStatusCode(400);
+                response.setMessage("CommandFailureException throw !");
                 response.setData(e);
             }
         } else {
-            LOGGER.warn("No mongoTemplate found !");
+            String message = "No mongoTemplate found !";
+            LOGGER.warn(message);
+            response.setStatusCode(400);
+            response.setMessage(message);
         }
 
         return response;
-    }
-
-    // Handle all dispatcher exception
-    @ExceptionHandler(Exception.class)
-    public void handleExceptions(Exception e) {
-        LOGGER.error("Handle exceptions : {}", e.getClass());
     }
 
 }

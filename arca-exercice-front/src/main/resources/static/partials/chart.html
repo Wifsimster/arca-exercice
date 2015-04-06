@@ -4,7 +4,7 @@
 
 <div ng-show="dataCount > 0">
 
-    <h2 class="sub-header">Values by day</h2>
+    <h2 class="sub-header">Sum of values by day</h2>
 
     <!-- Loading spinner -->
     <li ng-hide="loaded" class="list-unstyled sk-spinner sk-spinner-wandering-cubes">
@@ -16,9 +16,11 @@
             data="sumByDay"
             showXAxis="true"
             showYAxis="true"
-            tooltips="true"
             xAxisTickFormat="xAxisTickFormat_Date_Format()"
-            interactive="true">
+            interactive="true"
+            showLegend="true"
+            tooltips="true"
+            tooltipcontent="toolTipContentFunction()">
         <svg></svg>
     </nvd3-line-chart>
 
