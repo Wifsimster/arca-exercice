@@ -126,15 +126,20 @@ public class DataController {
         if (totalLineNumber > 0) {
             Response response = getJobStatus();
             Executions executions = (Executions) response.getData();
-            float current = Float.valueOf(executions.getWriteCount());
+            if (executions != null) {
+                float current = Float.valueOf(executions.getWriteCount());
 
-            if (current > 0) {
-                float percentage = ((current * 100) / totalLineNumber);
-                LOGGER.debug("Percentage : {}%", percentage);
-                DecimalFormat df = new DecimalFormat("#.##");
-                return String.valueOf(df.format(percentage));
+                if (current > 0) {
+                    float percentage = ((current * 100) / totalLineNumber);
+                    LOGGER.debug("Percentage : {}%", percentage);
+                    DecimalFormat df = new DecimalFormat("#.##");
+                    return String.valueOf(df.format(percentage));
+                } else {
+                    LOGGER.warn("Cannot get current process line !");
+                    return "-1";
+                }
             } else {
-                LOGGER.warn("Cannot get current process line !");
+                LOGGER.warn("No execution found !");
                 return "-1";
             }
         } else {
